@@ -4,55 +4,25 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.navigation.NavType
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navArgument
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.macc2025.camera.CameraScreen
-import com.example.macc2025.maps.MapScreen
-import com.example.macc2025.maps.SearchScreen
+import com.example.macc2025.navigation.AppNavHost
 import com.example.macc2025.ui.theme.MACC2025Theme
-import com.example.macc2025.viewmodel.MainViewModel
 import com.google.android.libraries.places.api.Places
+import com.google.android.libraries.places.api.net.PlacesClient
 
 class MainActivity : ComponentActivity() {
+    private lateinit var placesClient: PlacesClient
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         enableEdgeToEdge()
+        // init Places SDK
         Places.initialize(applicationContext, getString(R.string.google_maps_key))
-        val placesClient = Places.createClient(this)
+        placesClient = Places.createClient(this)
 
         setContent {
             MACC2025Theme {
-                val navController = rememberNavController()
-                val viewModel: MainViewModel = viewModel()
-                NavHost(
-                    navController = navController,
-                    startDestination = "search"
-                ) {
-                    composable("search") {
-                        SearchScreen(navController, placesClient, viewModel)
-                    }
-                    composable(
-                        route = "map/{lat}/{lng}",
-                        arguments = listOf(
-                            navArgument("lat") { type = NavType.FloatType },
-                            navArgument("lng") { type = NavType.FloatType }
-                        )
-                    ) { backStackEntry ->
-                        val lat = backStackEntry.arguments?.getFloat("lat") ?: 0f
-                        val lng = backStackEntry.arguments?.getFloat("lng") ?: 0f
-                        MapScreen(navController, lat.toDouble(), lng.toDouble(), viewModel)
-                    }
-                    composable("camera") {
-                        CameraScreen(navController, viewModel)
-                    }
-                }
+                AppNavHost(placesClient)
             }
         }
     }

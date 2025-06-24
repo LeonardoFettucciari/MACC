@@ -29,8 +29,8 @@ class MainViewModel : ViewModel() {
         _currentLocation.value = location
     }
 
-    fun updateOrientation(degrees: Float) {
-        _currentOrientation.value = degrees
+    fun updateOrientation(azimuth: Float) {
+        _currentOrientation.value = azimuth
     }
 
     fun lockOrientation() {
@@ -43,26 +43,27 @@ class MainViewModel : ViewModel() {
         val end = _selectedLocation.value
         val locked = _lockedOrientation.value
         if (start != null && end != null && locked != null) {
-            val startLoc = android.location.Location("start").apply {
-                latitude = start.latitude
-                longitude = start.longitude
-            }
-            val endLoc = android.location.Location("end").apply {
-                latitude = end.latitude
-                longitude = end.longitude
-            }
-            var bearing = startLoc.bearingTo(endLoc)
-            if (bearing < 0) bearing += 360f
-            var diff = kotlin.math.abs(locked - bearing)
-            if (diff > 180f) diff = 360f - diff
-            _difference.value = diff
+            val bearing = calculateBearing(start, end)
+            _difference.value = (bearing - locked + 360) % 360
         }
     }
 
     fun reset() {
-        _selectedLocation.value = null
         _lockedOrientation.value = null
-        _currentLocation.value = null
         _difference.value = null
+    }
+
+    private fun calculateBearing(start: LatLng, end: LatLng): Float {
+        val lat1 = Math.toRadians(start.latitude)
+        val lon1 = Math.toRadians(start.longitude)
+        val lat2 = Math.toRadians(end.latitude)
+        val lon2 = Math.toRadians(end.longitude)
+        val dLon = lon2 - lon1
+
+        val y = Math.sin(dLon) * Math.cos(lat2)
+        val x = Math.cos(lat1) * Math.sin(lat2) -
+                Math.sin(lat1) * Math.cos(lat2) * Math.cos(dLon)
+        val bearing = Math.toDegrees(Math.atan2(y, x))
+        return ((bearing + 360) % 360).toFloat()
     }
 }
