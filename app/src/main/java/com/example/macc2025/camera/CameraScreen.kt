@@ -109,10 +109,26 @@ fun CameraScreen(navController: NavController, viewModel: MainViewModel = viewMo
                         SensorManager.getRotationMatrixFromVector(rotationMatrix, event.values)
                         val orientations = FloatArray(3)
                         SensorManager.getOrientation(rotationMatrix, orientations)
-                        val azimuthRad = orientations[0]
-                        val degrees =
-                            (Math.toDegrees(azimuthRad.toDouble()).toFloat() + 360) % 360
-                        viewModel.updateOrientation(degrees)
+
+                        val yaw = Math.toDegrees(orientations[0].toDouble()).toFloat()
+                        val pitch = Math.toDegrees(orientations[1].toDouble()).toFloat()
+                        val roll = Math.toDegrees(orientations[2].toDouble()).toFloat()
+
+                        val orientationDeg = if (kotlin.math.abs(pitch) > 60f) {
+                            (yaw + 360f) % 360f
+                        } else {
+                            (roll + 360f) % 360f
+                        }
+                    }
+            ) {
+                AndroidView({ previewView }, modifier = Modifier.fillMaxSize())
+                val displayText = when {
+                    difference != null -> "Off by ${difference!!.roundToInt()}°"
+                    lockedOrientation != null -> "Locked: ${lockedOrientation?.roundToInt()}°"
+                    else -> "Orientation: ${orientation.roundToInt()}°"
+                }
+
+                        viewModel.updateOrientation(orientationDeg)
                     }
 
                     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
@@ -147,15 +163,22 @@ fun CameraScreen(navController: NavController, viewModel: MainViewModel = viewMo
                     }
             ) {
                 AndroidView({ previewView }, modifier = Modifier.fillMaxSize())
-                val displayText = when {
-                    difference != null -> "Off by ${difference!!.roundToInt()}°"
-                    lockedOrientation != null -> "Locked: ${lockedOrientation?.roundToInt()}°"
-                    else -> "Orientation: ${orientation.roundToInt()}°"
+                val (displayText, textColor) = when {
+                    difference != null -> {
+                        val color = if (difference!! < 15f) Color.Green else Color.Red
+                        "Off by ${difference!!.roundToInt()}°" to color
+                    }
+                    lockedOrientation != null -> {
+                        "Locked: ${lockedOrientation?.roundToInt()}°" to Color.White
+                    }
+                    else -> {
+                        "Orientation: ${orientation.roundToInt()}°" to Color.White
+                    }
                 }
 
                 Text(
                     text = displayText,
-                    color = Color.White,
+                    color = textColor,
                     modifier = Modifier
                         .align(Alignment.Center)
                         .background(Color.Black.copy(alpha = 0.5f))
