@@ -76,7 +76,7 @@ fun SearchScreen(
                                     .addOnSuccessListener { placeResponse ->
                                         placeResponse.place.latLng?.let { latLng ->
                                             viewModel.setSelectedLocation(latLng)
-                                            navController.navigate("map/${latLng.latitude}/${latLng.longitude}")
+                                            navController.navigate("camera")
                                         }
                                     }
                             }

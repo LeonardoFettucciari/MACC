@@ -36,7 +36,9 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import com.example.macc2025.viewmodel.MainViewModel
 import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.Priority
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.tasks.CancellationTokenSource
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
@@ -114,12 +116,19 @@ fun CameraScreen(navController: NavController, viewModel: MainViewModel = viewMo
                         SensorManager.getOrientation(rotationMatrix, orientations)
 
                         val azimuth = Math.toDegrees(orientations[0].toDouble()).toFloat()
-                        var orientationDeg = (azimuth + 360f) % 360f
+                        val pitch = Math.toDegrees(orientations[1].toDouble()).toFloat()
+                        val roll = Math.toDegrees(orientations[2].toDouble()).toFloat()
+
+                        val rawOrientation = if (kotlin.math.abs(pitch) > 60f) {
+                            (roll + 360f) % 360f
+                        } else {
+                            (azimuth + 360f) % 360f
+                        }
 
                         smoothed = if (smoothed == null) {
-                            orientationDeg
+                            rawOrientation
                         } else {
-                            smoothed!! * 0.9f + orientationDeg * 0.1f
+                            smoothed!! * 0.9f + rawOrientation * 0.1f
                         }
 
                         viewModel.updateOrientation(smoothed!!)
@@ -142,16 +151,25 @@ fun CameraScreen(navController: NavController, viewModel: MainViewModel = viewMo
                     .background(Color.Black)
                     .pointerInput(Unit) {
                         detectTapGestures {
+                            fun handleLocation(loc: android.location.Location) {
+                                viewModel.setCurrentLocation(
+                                    LatLng(loc.latitude, loc.longitude)
+                                )
+                                viewModel.lockOrientation()
+                            }
+
                             scope.launch {
                                 fusedClient.lastLocation.addOnSuccessListener { location ->
-                                    location?.let {
-                                        viewModel.setCurrentLocation(
-                                            LatLng(it.latitude, it.longitude)
-                                        )
-                                        viewModel.lockOrientation()
+                                    if (location != null) {
+                                        handleLocation(location)
+                                    } else {
+                                        val cts = CancellationTokenSource()
+                                        fusedClient.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, cts.token)
+                                            .addOnSuccessListener { fresh ->
+                                                fresh?.let { handleLocation(it) }
+                                            }
                                     }
                                 }
-
                             }
                         }
                     }
@@ -190,25 +208,9 @@ fun CameraScreen(navController: NavController, viewModel: MainViewModel = viewMo
                             .align(Alignment.BottomCenter)
                             .padding(16.dp)
                     ) {
-                        Text("Search Again")
+                        Text("Start Over")
                     }
                 }
-            }
-        } else {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding)
-                    .background(Color.Black),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = "Camera and location permissions are required to use this feature.",
-                    color = Color.White,
-                    modifier = Modifier
-                        .background(Color.Black.copy(alpha = 0.5f))
-                        .padding(8.dp)
-                )
             }
         } else {
             Box(
