@@ -103,6 +103,9 @@ fun CameraScreen(navController: NavController, viewModel: MainViewModel = viewMo
                 val sensorManager =
                     context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
                 val rotationVector = sensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR)
+
+                var smoothed: Float? = null
+
                 val listener = object : SensorEventListener {
                     override fun onSensorChanged(event: SensorEvent) {
                         val rotationMatrix = FloatArray(9)
@@ -110,25 +113,16 @@ fun CameraScreen(navController: NavController, viewModel: MainViewModel = viewMo
                         val orientations = FloatArray(3)
                         SensorManager.getOrientation(rotationMatrix, orientations)
 
-                        val yaw = Math.toDegrees(orientations[0].toDouble()).toFloat()
-                        val pitch = Math.toDegrees(orientations[1].toDouble()).toFloat()
-                        val roll = Math.toDegrees(orientations[2].toDouble()).toFloat()
+                        val azimuth = Math.toDegrees(orientations[0].toDouble()).toFloat()
+                        var orientationDeg = (azimuth + 360f) % 360f
 
-                        val orientationDeg = if (kotlin.math.abs(pitch) > 60f) {
-                            (yaw + 360f) % 360f
+                        smoothed = if (smoothed == null) {
+                            orientationDeg
                         } else {
-                            (roll + 360f) % 360f
+                            smoothed!! * 0.9f + orientationDeg * 0.1f
                         }
-                    }
-            ) {
-                AndroidView({ previewView }, modifier = Modifier.fillMaxSize())
-                val displayText = when {
-                    difference != null -> "Off by ${difference!!.roundToInt()}°"
-                    lockedOrientation != null -> "Locked: ${lockedOrientation?.roundToInt()}°"
-                    else -> "Orientation: ${orientation.roundToInt()}°"
-                }
 
-                        viewModel.updateOrientation(orientationDeg)
+                        viewModel.updateOrientation(smoothed!!)
                     }
 
                     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
@@ -199,12 +193,22 @@ fun CameraScreen(navController: NavController, viewModel: MainViewModel = viewMo
                         Text("Search Again")
                     }
                 }
-        ) {
-            AndroidView({ previewView }, modifier = Modifier.fillMaxSize())
-            val displayText = when {
-                difference != null -> "Off by ${difference!!.roundToInt()}°"
-                lockedOrientation != null -> "Locked: ${lockedOrientation?.roundToInt()}°"
-                else -> "Orientation: ${orientation.roundToInt()}°"
+            }
+        } else {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding)
+                    .background(Color.Black),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "Camera and location permissions are required to use this feature.",
+                    color = Color.White,
+                    modifier = Modifier
+                        .background(Color.Black.copy(alpha = 0.5f))
+                        .padding(8.dp)
+                )
             }
         } else {
             Box(
