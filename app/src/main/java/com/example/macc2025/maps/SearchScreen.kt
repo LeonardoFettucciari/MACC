@@ -12,14 +12,20 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.macc2025.viewmodel.MainViewModel
 import com.google.android.libraries.places.api.model.AutocompletePrediction
-import com.google.android.libraries.places.api.model.FetchPlaceRequest
+import com.google.android.libraries.places.api.net.FetchPlaceRequest
 import com.google.android.libraries.places.api.model.Place
-import com.google.android.libraries.places.api.model.FindAutocompletePredictionsRequest
+import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRequest
 import com.google.android.libraries.places.api.net.PlacesClient
 
 @Composable
-fun SearchScreen(navController: NavController, placesClient: PlacesClient) {
+fun SearchScreen(
+    navController: NavController,
+    placesClient: PlacesClient,
+    viewModel: MainViewModel = viewModel()
+) {
     var query by remember { mutableStateOf("") }
     var predictions by remember { mutableStateOf<List<AutocompletePrediction>>(emptyList()) }
 
@@ -58,6 +64,7 @@ fun SearchScreen(navController: NavController, placesClient: PlacesClient) {
                             placesClient.fetchPlace(placeRequest)
                                 .addOnSuccessListener { placeResponse ->
                                     placeResponse.place.latLng?.let { latLng ->
+                                        viewModel.setSelectedLocation(latLng)
                                         navController.navigate("map/${latLng.latitude}/${latLng.longitude}")
                                     }
                                 }

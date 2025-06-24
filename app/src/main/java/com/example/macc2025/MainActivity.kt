@@ -12,9 +12,12 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.macc2025.camera.CameraScreen
 import com.example.macc2025.maps.MapScreen
 import com.example.macc2025.maps.SearchScreen
 import com.example.macc2025.ui.theme.MACC2025Theme
+import com.example.macc2025.viewmodel.MainViewModel
 import com.google.android.libraries.places.api.Places
 
 class MainActivity : ComponentActivity() {
@@ -27,12 +30,13 @@ class MainActivity : ComponentActivity() {
         setContent {
             MACC2025Theme {
                 val navController = rememberNavController()
+                val viewModel: MainViewModel = viewModel()
                 NavHost(
                     navController = navController,
                     startDestination = "search"
                 ) {
                     composable("search") {
-                        SearchScreen(navController, placesClient)
+                        SearchScreen(navController, placesClient, viewModel)
                     }
                     composable(
                         route = "map/{lat}/{lng}",
@@ -43,7 +47,10 @@ class MainActivity : ComponentActivity() {
                     ) { backStackEntry ->
                         val lat = backStackEntry.arguments?.getFloat("lat") ?: 0f
                         val lng = backStackEntry.arguments?.getFloat("lng") ?: 0f
-                        MapScreen(lat.toDouble(), lng.toDouble())
+                        MapScreen(navController, lat.toDouble(), lng.toDouble(), viewModel)
+                    }
+                    composable("camera") {
+                        CameraScreen(navController, viewModel)
                     }
                 }
             }
