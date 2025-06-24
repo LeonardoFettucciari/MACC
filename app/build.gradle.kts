@@ -52,6 +52,7 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.google.maps.compose)
     implementation(libs.google.play.services.maps)
+    implementation(libs.google.play.services.location)
     implementation(libs.google.places)
     implementation(libs.androidx.camera.core)
     implementation(libs.androidx.camera.camera2)
