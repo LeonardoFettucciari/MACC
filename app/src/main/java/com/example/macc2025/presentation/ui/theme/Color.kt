@@ -1,4 +1,4 @@
-package com.example.macc2025.ui.theme
+package com.example.macc2025.presentation.ui.theme
 
 import androidx.compose.ui.graphics.Color
 

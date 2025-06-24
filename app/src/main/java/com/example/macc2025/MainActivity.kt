@@ -5,7 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import com.example.macc2025.navigation.AppNavHost
-import com.example.macc2025.ui.theme.MACC2025Theme
+import com.example.macc2025.presentation.ui.theme.MACC2025Theme
 import com.google.android.libraries.places.api.Places
 import com.google.android.libraries.places.api.net.PlacesClient
 
