@@ -18,6 +18,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.material3.Text
 import androidx.compose.material3.Button
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -37,6 +40,7 @@ import com.google.android.gms.maps.model.LatLng
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CameraScreen(navController: NavController, viewModel: MainViewModel = viewModel()) {
     val context = LocalContext.current
@@ -78,62 +82,98 @@ fun CameraScreen(navController: NavController, viewModel: MainViewModel = viewMo
         }
     }
 
-    if (permissionsGranted) {
-        val previewView = remember { PreviewView(context) }
-        val fusedClient = remember { LocationServices.getFusedLocationProviderClient(context) }
+    Scaffold(
+        topBar = { CenterAlignedTopAppBar(title = { Text("Camera") }) }
+    ) { innerPadding ->
+        if (permissionsGranted) {
+            val previewView = remember { PreviewView(context) }
+            val fusedClient = remember { LocationServices.getFusedLocationProviderClient(context) }
 
-        LaunchedEffect(Unit) {
-            val cameraProvider = context.getCameraProvider()
-            val preview = Preview.Builder().build().also {
-                it.setSurfaceProvider(previewView.surfaceProvider)
-            }
-            val selector = CameraSelector.DEFAULT_BACK_CAMERA
-            cameraProvider.unbindAll()
-            cameraProvider.bindToLifecycle(lifecycleOwner, selector, preview)
-        }
-
-        DisposableEffect(Unit) {
-            val sensorManager =
-                context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
-            val rotationVector = sensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR)
-            val listener = object : SensorEventListener {
-                override fun onSensorChanged(event: SensorEvent) {
-                    val rotationMatrix = FloatArray(9)
-                    SensorManager.getRotationMatrixFromVector(rotationMatrix, event.values)
-                    val orientations = FloatArray(3)
-                    SensorManager.getOrientation(rotationMatrix, orientations)
-                    val azimuthRad = orientations[0]
-                    val degrees =
-                        (Math.toDegrees(azimuthRad.toDouble()).toFloat() + 360) % 360
-                    viewModel.updateOrientation(degrees)
+            LaunchedEffect(Unit) {
+                val cameraProvider = context.getCameraProvider()
+                val preview = Preview.Builder().build().also {
+                    it.setSurfaceProvider(previewView.surfaceProvider)
                 }
-
-                override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
+                val selector = CameraSelector.DEFAULT_BACK_CAMERA
+                cameraProvider.unbindAll()
+                cameraProvider.bindToLifecycle(lifecycleOwner, selector, preview)
             }
-            sensorManager.registerListener(
-                listener,
-                rotationVector,
-                SensorManager.SENSOR_DELAY_UI
-            )
-            onDispose { sensorManager.unregisterListener(listener) }
-        }
 
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color.Black)
-                .pointerInput(Unit) {
-                    detectTapGestures {
-                        scope.launch {
-                            fusedClient.lastLocation.addOnSuccessListener { location ->
-                                location?.let {
-                                    viewModel.setCurrentLocation(
-                                        LatLng(it.latitude, it.longitude)
-                                    )
-                                    viewModel.lockOrientation()
+            DisposableEffect(Unit) {
+                val sensorManager =
+                    context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
+                val rotationVector = sensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR)
+                val listener = object : SensorEventListener {
+                    override fun onSensorChanged(event: SensorEvent) {
+                        val rotationMatrix = FloatArray(9)
+                        SensorManager.getRotationMatrixFromVector(rotationMatrix, event.values)
+                        val orientations = FloatArray(3)
+                        SensorManager.getOrientation(rotationMatrix, orientations)
+                        val azimuthRad = orientations[0]
+                        val degrees =
+                            (Math.toDegrees(azimuthRad.toDouble()).toFloat() + 360) % 360
+                        viewModel.updateOrientation(degrees)
+                    }
+
+                    override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
+                }
+                sensorManager.registerListener(
+                    listener,
+                    rotationVector,
+                    SensorManager.SENSOR_DELAY_UI
+                )
+                onDispose { sensorManager.unregisterListener(listener) }
+            }
+
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding)
+                    .background(Color.Black)
+                    .pointerInput(Unit) {
+                        detectTapGestures {
+                            scope.launch {
+                                fusedClient.lastLocation.addOnSuccessListener { location ->
+                                    location?.let {
+                                        viewModel.setCurrentLocation(
+                                            LatLng(it.latitude, it.longitude)
+                                        )
+                                        viewModel.lockOrientation()
+                                    }
                                 }
+
                             }
                         }
+                    }
+            ) {
+                AndroidView({ previewView }, modifier = Modifier.fillMaxSize())
+                val displayText = when {
+                    difference != null -> "Off by ${difference!!.roundToInt()}°"
+                    lockedOrientation != null -> "Locked: ${lockedOrientation?.roundToInt()}°"
+                    else -> "Orientation: ${orientation.roundToInt()}°"
+                }
+
+                Text(
+                    text = displayText,
+                    color = Color.White,
+                    modifier = Modifier
+                        .align(Alignment.Center)
+                        .background(Color.Black.copy(alpha = 0.5f))
+                        .padding(8.dp)
+                )
+                if (difference != null) {
+                    Button(
+                        onClick = {
+                            viewModel.reset()
+                            navController.navigate("search") {
+                                popUpTo("search") { inclusive = true }
+                            }
+                        },
+                        modifier = Modifier
+                            .align(Alignment.BottomCenter)
+                            .padding(16.dp)
+                    ) {
+                        Text("Search Again")
                     }
                 }
         ) {
@@ -143,29 +183,21 @@ fun CameraScreen(navController: NavController, viewModel: MainViewModel = viewMo
                 lockedOrientation != null -> "Locked: ${lockedOrientation?.roundToInt()}°"
                 else -> "Orientation: ${orientation.roundToInt()}°"
             }
-
-            Text(
-                text = displayText,
-                color = Color.White,
+        } else {
+            Box(
                 modifier = Modifier
-                    .align(Alignment.Center)
-                    .background(Color.Black.copy(alpha = 0.5f))
-                    .padding(8.dp)
-            )
-            if (difference != null) {
-                androidx.compose.material3.Button(
-                    onClick = {
-                        viewModel.reset()
-                        navController.navigate("search") {
-                            popUpTo("search") { inclusive = true }
-                        }
-                    },
+                    .fillMaxSize()
+                    .padding(innerPadding)
+                    .background(Color.Black),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "Camera and location permissions are required to use this feature.",
+                    color = Color.White,
                     modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .padding(16.dp)
-                ) {
-                    androidx.compose.material3.Text("Search Again")
-                }
+                        .background(Color.Black.copy(alpha = 0.5f))
+                        .padding(8.dp)
+                )
             }
         }
     } else {

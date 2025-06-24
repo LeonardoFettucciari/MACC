@@ -8,6 +8,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -20,6 +23,7 @@ import com.google.android.libraries.places.api.model.Place
 import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRequest
 import com.google.android.libraries.places.api.net.PlacesClient
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchScreen(
     navController: NavController,
@@ -39,38 +43,46 @@ fun SearchScreen(
             }
     }
 
-    Column(modifier = Modifier.padding(16.dp)) {
-        OutlinedTextField(
-            value = query,
-            onValueChange = {
-                query = it
-                search(it)
-            },
-            modifier = Modifier.fillMaxWidth(),
-            label = { Text("Search location") }
-        )
+    Scaffold(
+        topBar = { CenterAlignedTopAppBar(title = { Text("Search") }) }
+    ) { innerPadding ->
+        Column(
+            modifier = Modifier
+                .padding(innerPadding)
+                .padding(16.dp)
+        ) {
+            OutlinedTextField(
+                value = query,
+                onValueChange = {
+                    query = it
+                    search(it)
+                },
+                modifier = Modifier.fillMaxWidth(),
+                label = { Text("Search location") }
+            )
 
-        LazyColumn {
-            items(predictions) { prediction ->
-                Text(
-                    text = prediction.getFullText(null).toString(),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable {
-                            val placeRequest = FetchPlaceRequest.builder(
-                                prediction.placeId,
-                                listOf(Place.Field.LAT_LNG)
-                            ).build()
-                            placesClient.fetchPlace(placeRequest)
-                                .addOnSuccessListener { placeResponse ->
-                                    placeResponse.place.latLng?.let { latLng ->
-                                        viewModel.setSelectedLocation(latLng)
-                                        navController.navigate("map/${latLng.latitude}/${latLng.longitude}")
+            LazyColumn {
+                items(predictions) { prediction ->
+                    Text(
+                        text = prediction.getFullText(null).toString(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable {
+                                val placeRequest = FetchPlaceRequest.builder(
+                                    prediction.placeId,
+                                    listOf(Place.Field.LAT_LNG)
+                                ).build()
+                                placesClient.fetchPlace(placeRequest)
+                                    .addOnSuccessListener { placeResponse ->
+                                        placeResponse.place.latLng?.let { latLng ->
+                                            viewModel.setSelectedLocation(latLng)
+                                            navController.navigate("map/${latLng.latitude}/${latLng.longitude}")
+                                        }
                                     }
-                                }
-                        }
-                        .padding(8.dp)
-                )
+                            }
+                            .padding(8.dp)
+                    )
+                }
             }
         }
     }
