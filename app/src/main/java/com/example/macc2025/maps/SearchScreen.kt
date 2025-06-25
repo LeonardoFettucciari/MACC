@@ -6,8 +6,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material3.*
+import com.firebase.ui.auth.AuthUI
+import com.google.firebase.auth.FirebaseAuth
 import androidx.compose.runtime.*
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -20,6 +25,7 @@ fun SearchScreen(
     navController: NavController,
     viewModel: SearchViewModel
 ) {
+    val context = LocalContext.current
     var query by remember { mutableStateOf("") }
     val predictions by viewModel.predictions.collectAsState()
     val errorMessage by viewModel.errorMessage.collectAsState()
@@ -29,7 +35,19 @@ fun SearchScreen(
     }
 
     Scaffold(
-        topBar = { CenterAlignedTopAppBar(title = { Text("Search") }) }
+        topBar = {
+            CenterAlignedTopAppBar(
+                title = { Text("Search") },
+                actions = {
+                    IconButton(onClick = {
+                        AuthUI.getInstance().signOut(context)
+                        FirebaseAuth.getInstance().signOut()
+                    }) {
+                        Icon(Icons.Default.Logout, contentDescription = "Logout")
+                    }
+                }
+            )
+        }
     ) { innerPadding ->
         Column(
             Modifier
