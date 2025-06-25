@@ -63,6 +63,7 @@ dependencies {
     implementation(libs.google.maps.compose)
     implementation(libs.google.play.services.maps)
     implementation(libs.google.play.services.location)
+    implementation(libs.google.play.services.auth)
     implementation(libs.google.places)
     implementation(libs.dagger.hilt.android)
     implementation(libs.hilt.navigation.compose)
