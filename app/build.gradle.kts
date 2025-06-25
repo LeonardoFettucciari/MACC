@@ -2,6 +2,8 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.kotlin.kapt)
+    alias(libs.plugins.hilt.android)
 }
 
 android {
@@ -37,6 +39,12 @@ android {
     buildFeatures {
         compose = true
     }
+    kapt {
+        correctErrorTypes = true
+    }
+    hilt {
+        enableAggregatingTask = false
+    }
 }
 
 dependencies {
@@ -55,6 +63,9 @@ dependencies {
     implementation(libs.google.play.services.maps)
     implementation(libs.google.play.services.location)
     implementation(libs.google.places)
+    implementation(libs.dagger.hilt.android)
+    implementation(libs.hilt.navigation.compose)
+    kapt(libs.dagger.hilt.compiler)
     implementation(libs.androidx.camera.core)
     implementation(libs.androidx.camera.camera2)
     implementation(libs.androidx.camera.lifecycle)

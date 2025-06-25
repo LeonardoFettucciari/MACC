@@ -4,6 +4,7 @@ package com.example.macc2025.navigation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.getValue
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -12,16 +13,15 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.example.macc2025.camera.CameraScreen
-import com.example.macc2025.maps.MapScreen
-import com.example.macc2025.maps.SearchScreen
-import com.example.macc2025.viewmodel.MainViewModel
-import com.google.android.libraries.places.api.net.PlacesClient
+import com.example.macc2025.presentation.ui.CameraScreen
+import com.example.macc2025.presentation.ui.MapScreen
+import com.example.macc2025.presentation.ui.SearchScreen
+import com.example.macc2025.presentation.viewmodel.SearchViewModel
+import com.example.macc2025.presentation.viewmodel.CameraViewModel
+import com.example.macc2025.presentation.viewmodel.MapViewModel
 
 @Composable
-fun AppNavHost(
-    placesClient: PlacesClient
-) {
+fun AppNavHost() {
     val navController = rememberNavController()
 
     NavHost(
@@ -38,11 +38,10 @@ fun AppNavHost(
                 val parentEntry = remember(backStackEntry) {
                     navController.getBackStackEntry("mainGraph")
                 }
-                val viewModel: MainViewModel = viewModel(parentEntry)
+                val viewModel: SearchViewModel = hiltViewModel(parentEntry)
 
                 SearchScreen(
                     navController = navController,
-                    placesClient = placesClient,
                     viewModel = viewModel
                 )
             }
@@ -82,7 +81,8 @@ fun AppNavHost(
                 val parentEntry = remember(backStackEntry) {
                     navController.getBackStackEntry("mainGraph")
                 }
-                val viewModel: MainViewModel = viewModel(parentEntry)
+                val searchViewModel: SearchViewModel = hiltViewModel(parentEntry)
+                val cameraViewModel: CameraViewModel = viewModel()
 
                 CameraScreen(
                     navController = navController,
