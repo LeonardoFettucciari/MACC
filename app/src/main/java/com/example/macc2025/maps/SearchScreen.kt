@@ -24,6 +24,10 @@ fun SearchScreen(
     val predictions by viewModel.predictions.collectAsState()
     val errorMessage by viewModel.errorMessage.collectAsState()
 
+    LaunchedEffect(Unit) {
+        viewModel.search(query)
+    }
+
     Scaffold(
         topBar = { CenterAlignedTopAppBar(title = { Text("Search") }) }
     ) { innerPadding ->
