@@ -18,6 +18,7 @@ import androidx.camera.view.PreviewView
 import androidx.compose.foundation.background
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -40,6 +41,7 @@ import com.example.macc2025.presentation.viewmodel.CameraViewModel
 import com.example.macc2025.presentation.viewmodel.SearchViewModel
 import com.example.macc2025.utils.camera.getCameraProvider
 import com.example.macc2025.utils.graphics.CircumflexIcon
+import com.example.macc2025.utils.graphics.HorizonTicks
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
 import com.firebase.ui.auth.AuthUI
@@ -47,6 +49,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.tasks.CancellationTokenSource
 import org.opencv.android.OpenCVLoader
+import androidx.compose.ui.platform.LocalDensity
 import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -191,12 +194,18 @@ fun CameraScreen(
             }
         }
 
-        Box(
+        BoxWithConstraints(
             Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
                 .background(Color.Black)
         ) {
+            val density = LocalDensity.current
+            val widthPx = with(density) { maxWidth.roundToPx() }
+            val ticksBitmap = remember(orientation, widthPx) {
+                HorizonTicks.create(orientation.roundToInt(), widthPx).asImageBitmap()
+            }
+
             AndroidView(
                 factory = {
                     previewView.apply {
@@ -207,6 +216,12 @@ fun CameraScreen(
                     }
                 },
                 modifier = Modifier.fillMaxSize()
+            )
+
+            Image(
+                bitmap = ticksBitmap,
+                contentDescription = null,
+                modifier = Modifier.align(Alignment.Center)
             )
 
             Image(
