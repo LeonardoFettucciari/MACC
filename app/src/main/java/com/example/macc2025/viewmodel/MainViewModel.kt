@@ -1,14 +1,22 @@
 package com.example.macc2025.viewmodel
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.macc2025.domain.repository.UserRepository
+import com.google.android.gms.maps.model.LatLng
+import com.google.firebase.auth.FirebaseAuth
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import com.google.android.gms.maps.model.LatLng
+import kotlinx.coroutines.launch
+import kotlin.math.exp
+import kotlin.math.ln
 
-class MainViewModel : ViewModel() {
-    private val _selectedLocation = MutableStateFlow<LatLng?>(null)
-    val selectedLocation: StateFlow<LatLng?> = _selectedLocation
-
+@HiltViewModel
+class CameraViewModel @Inject constructor(
+    private val userRepository: UserRepository
+) : ViewModel() {
     private val _currentLocation = MutableStateFlow<LatLng?>(null)
     val currentLocation: StateFlow<LatLng?> = _currentLocation
 
@@ -38,14 +46,28 @@ class MainViewModel : ViewModel() {
         computeDifference()
     }
 
-    private fun computeDifference() {
-        val start = _currentLocation.value
-        val end = _selectedLocation.value
-        val locked = _lockedOrientation.value
-        if (start != null && end != null && locked != null) {
-            val bearing = calculateBearing(start, end)
-            _difference.value = (bearing - locked + 360) % 360
+    private fun computeDifference(start: LatLng, end: LatLng, locked: Float) {
+        val bearing = calculateBearing(start, end)
+        val diff = (bearing - locked + 360) % 360
+        val finalDiff = if (diff > 180) 360 - diff else diff
+        _difference.value = finalDiff
+
+        val points = calculatePoints(finalDiff)
+        val uid = FirebaseAuth.getInstance().currentUser?.uid
+        if (uid != null) {
+            viewModelScope.launch {
+                try {
+                    userRepository.addPoints(uid, points)
+                } catch (_: Exception) {
+                }
+            }
         }
+    }
+
+    private fun calculatePoints(diff: Float): Int {
+        if (diff >= 50f) return 10
+        val k = ln(50.0) / 50.0
+        return (500 * exp(-k * diff)).toInt()
     }
 
     fun reset() {

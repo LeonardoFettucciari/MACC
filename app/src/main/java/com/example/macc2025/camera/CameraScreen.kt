@@ -19,6 +19,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -34,6 +36,8 @@ import androidx.navigation.NavController
 import com.example.macc2025.viewmodel.MainViewModel
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
+import com.firebase.ui.auth.AuthUI
+import com.google.firebase.auth.FirebaseAuth
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.tasks.CancellationTokenSource
 import kotlin.math.roundToInt
@@ -68,8 +72,33 @@ fun CameraScreen(
         }
     }
 
+    var menuExpanded by remember { mutableStateOf(false) }
+
     Scaffold(
-        topBar = { CenterAlignedTopAppBar(title = { Text("Camera") }) }
+        topBar = {
+            CenterAlignedTopAppBar(
+                title = { Text("Camera") },
+                actions = {
+                    IconButton(onClick = { menuExpanded = true }) {
+                        Icon(Icons.Default.MoreVert, contentDescription = "Menu")
+                    }
+                    DropdownMenu(
+                        expanded = menuExpanded,
+                        onDismissRequest = { menuExpanded = false }
+                    ) {
+                        DropdownMenuItem(text = { Text("Profile") }, onClick = {
+                            menuExpanded = false
+                            navController.navigate("profile")
+                        })
+                        DropdownMenuItem(text = { Text("Logout") }, onClick = {
+                            menuExpanded = false
+                            AuthUI.getInstance().signOut(context)
+                            FirebaseAuth.getInstance().signOut()
+                        })
+                    }
+                }
+            )
+        }
     ) { innerPadding ->
         if (!permissionsGranted) {
             Box(

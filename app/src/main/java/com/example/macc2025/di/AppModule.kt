@@ -4,9 +4,12 @@ import android.content.Context
 import com.example.macc2025.R
 import com.example.macc2025.data.remote.PlacesRemoteDataSource
 import com.example.macc2025.data.repository.PlacesRepositoryImpl
+import com.example.macc2025.data.repository.UserRepositoryImpl
 import com.example.macc2025.domain.repository.PlacesRepository
+import com.example.macc2025.domain.repository.UserRepository
 import com.example.macc2025.domain.usecase.GetPlaceDetailsUseCase
 import com.example.macc2025.domain.usecase.SearchLocationsUseCase
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.android.libraries.places.api.Places
 import com.google.android.libraries.places.api.net.PlacesClient
 import dagger.Module
@@ -36,6 +39,15 @@ object AppModule {
     @Singleton
     fun provideRepository(remote: PlacesRemoteDataSource): PlacesRepository =
         PlacesRepositoryImpl(remote)
+
+    @Provides
+    @Singleton
+    fun provideFirestore(): FirebaseFirestore = FirebaseFirestore.getInstance()
+
+    @Provides
+    @Singleton
+    fun provideUserRepository(db: FirebaseFirestore): UserRepository =
+        UserRepositoryImpl(db)
 
     @Provides
     fun provideSearchLocationsUseCase(repo: PlacesRepository): SearchLocationsUseCase =

@@ -14,11 +14,13 @@ import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.macc2025.presentation.ui.CameraScreen
+import com.example.macc2025.presentation.ui.ProfileScreen
 import com.example.macc2025.presentation.ui.MapScreen
 import com.example.macc2025.presentation.ui.SearchScreen
 import com.example.macc2025.presentation.viewmodel.SearchViewModel
 import com.example.macc2025.presentation.viewmodel.CameraViewModel
 import com.example.macc2025.presentation.viewmodel.MapViewModel
+import com.example.macc2025.presentation.viewmodel.ProfileViewModel
 
 @Composable
 fun AppNavHost() {
@@ -82,9 +84,18 @@ fun AppNavHost() {
                     navController.getBackStackEntry("mainGraph")
                 }
                 val searchViewModel: SearchViewModel = hiltViewModel(parentEntry)
-                val cameraViewModel: CameraViewModel = viewModel()
+                val cameraViewModel: CameraViewModel = hiltViewModel()
 
                 CameraScreen(
+                    navController = navController,
+                    viewModel = viewModel
+                )
+            }
+
+            // PROFILE SCREEN
+            composable("profile") {
+                val viewModel: ProfileViewModel = hiltViewModel()
+                ProfileScreen(
                     navController = navController,
                     viewModel = viewModel
                 )

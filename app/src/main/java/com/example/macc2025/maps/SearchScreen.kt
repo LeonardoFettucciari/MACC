@@ -7,7 +7,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Logout
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.*
 import com.firebase.ui.auth.AuthUI
 import com.google.firebase.auth.FirebaseAuth
@@ -36,14 +36,27 @@ fun SearchScreen(
 
     Scaffold(
         topBar = {
+            var menuExpanded by remember { mutableStateOf(false) }
+
             CenterAlignedTopAppBar(
                 title = { Text("Search") },
                 actions = {
-                    IconButton(onClick = {
-                        AuthUI.getInstance().signOut(context)
-                        FirebaseAuth.getInstance().signOut()
-                    }) {
-                        Icon(Icons.Default.Logout, contentDescription = "Logout")
+                    IconButton(onClick = { menuExpanded = true }) {
+                        Icon(Icons.Default.MoreVert, contentDescription = "Menu")
+                    }
+                    DropdownMenu(
+                        expanded = menuExpanded,
+                        onDismissRequest = { menuExpanded = false }
+                    ) {
+                        DropdownMenuItem(text = { Text("Profile") }, onClick = {
+                            menuExpanded = false
+                            navController.navigate("profile")
+                        })
+                        DropdownMenuItem(text = { Text("Logout") }, onClick = {
+                            menuExpanded = false
+                            AuthUI.getInstance().signOut(context)
+                            FirebaseAuth.getInstance().signOut()
+                        })
                     }
                 }
             )
