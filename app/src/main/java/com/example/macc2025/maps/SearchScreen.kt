@@ -18,6 +18,8 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.macc2025.viewmodel.MainViewModel
 import com.google.android.libraries.places.api.model.AutocompletePrediction
+import com.example.macc2025.presentation.viewmodel.ProfileViewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -26,12 +28,20 @@ fun SearchScreen(
     viewModel: SearchViewModel
 ) {
     val context = LocalContext.current
+    val profileViewModel: ProfileViewModel = hiltViewModel()
+    val username by profileViewModel.username.collectAsState()
     var query by remember { mutableStateOf("") }
     val predictions by viewModel.predictions.collectAsState()
     val errorMessage by viewModel.errorMessage.collectAsState()
 
     LaunchedEffect(Unit) {
         viewModel.search(query)
+    }
+
+    LaunchedEffect(username) {
+        if (username == null) {
+            navController.navigate("username")
+        }
     }
 
     Scaffold(
@@ -48,15 +58,19 @@ fun SearchScreen(
                         expanded = menuExpanded,
                         onDismissRequest = { menuExpanded = false }
                     ) {
-                        DropdownMenuItem(text = { Text("Profile") }, onClick = {
-                            menuExpanded = false
-                            navController.navigate("profile")
-                        })
-                        DropdownMenuItem(text = { Text("Logout") }, onClick = {
-                            menuExpanded = false
-                            AuthUI.getInstance().signOut(context)
-                            FirebaseAuth.getInstance().signOut()
-                        })
+                    DropdownMenuItem(text = { Text("Profile") }, onClick = {
+                        menuExpanded = false
+                        navController.navigate("profile")
+                    })
+                    DropdownMenuItem(text = { Text("Ranking") }, onClick = {
+                        menuExpanded = false
+                        navController.navigate("ranking")
+                    })
+                    DropdownMenuItem(text = { Text("Logout") }, onClick = {
+                        menuExpanded = false
+                        AuthUI.getInstance().signOut(context)
+                        FirebaseAuth.getInstance().signOut()
+                    })
                     }
                 }
             )

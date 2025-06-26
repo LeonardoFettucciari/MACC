@@ -29,4 +29,34 @@ class UserRepositoryImpl(
             }
             .addOnFailureListener { e -> cont.resumeWithException(e) }
     }
+
+    override suspend fun getUsername(uid: String): String? = suspendCancellableCoroutine { cont ->
+        val ref = firestore.collection("users").document(uid)
+        ref.get()
+            .addOnSuccessListener { snap -> cont.resume(snap.getString("username")) }
+            .addOnFailureListener { e -> cont.resumeWithException(e) }
+    }
+
+    override suspend fun setUsername(uid: String, username: String) = suspendCancellableCoroutine<Unit> { cont ->
+        val ref = firestore.collection("users").document(uid)
+        ref.set(mapOf("username" to username), com.google.firebase.firestore.SetOptions.merge())
+            .addOnSuccessListener { cont.resume(Unit) }
+            .addOnFailureListener { e -> cont.resumeWithException(e) }
+    }
+
+    override suspend fun getTopUsers(limit: Int): List<Pair<String, Int>> = suspendCancellableCoroutine { cont ->
+        firestore.collection("users")
+            .orderBy("points", com.google.firebase.firestore.Query.Direction.DESCENDING)
+            .limit(limit.toLong())
+            .get()
+            .addOnSuccessListener { snap ->
+                val list = snap.documents.mapNotNull { d ->
+                    val username = d.getString("username") ?: return@mapNotNull null
+                    val pts = d.getLong("points")?.toInt() ?: 0
+                    username to pts
+                }
+                cont.resume(list)
+            }
+            .addOnFailureListener { e -> cont.resumeWithException(e) }
+    }
 }

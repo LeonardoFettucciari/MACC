@@ -15,6 +15,8 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.macc2025.presentation.ui.CameraScreen
 import com.example.macc2025.presentation.ui.ProfileScreen
+import com.example.macc2025.presentation.ui.UsernameScreen
+import com.example.macc2025.presentation.ui.RankingScreen
 import com.example.macc2025.presentation.ui.MapScreen
 import com.example.macc2025.presentation.ui.SearchScreen
 import com.example.macc2025.presentation.viewmodel.SearchViewModel
@@ -108,6 +110,18 @@ fun AppNavHost() {
                     navController = navController,
                     viewModel = viewModel
                 )
+            }
+
+            // USERNAME SCREEN
+            composable("username") {
+                val viewModel: ProfileViewModel = hiltViewModel()
+                UsernameScreen(navController = navController, viewModel = viewModel)
+            }
+
+            // RANKING SCREEN
+            composable("ranking") {
+                val viewModel: ProfileViewModel = hiltViewModel()
+                RankingScreen(navController = navController, viewModel = viewModel)
             }
         }
     }
