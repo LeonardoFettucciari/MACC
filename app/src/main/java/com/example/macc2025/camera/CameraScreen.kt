@@ -16,6 +16,7 @@ import androidx.camera.core.CameraSelector
 import androidx.camera.core.Preview
 import androidx.camera.view.PreviewView
 import androidx.compose.foundation.background
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -26,20 +27,26 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
-import com.example.macc2025.viewmodel.MainViewModel
+import com.example.macc2025.presentation.viewmodel.CameraViewModel
+import com.example.macc2025.presentation.viewmodel.SearchViewModel
+import com.example.macc2025.utils.camera.getCameraProvider
+import com.example.macc2025.utils.graphics.CircumflexIcon
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
 import com.firebase.ui.auth.AuthUI
 import com.google.firebase.auth.FirebaseAuth
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.tasks.CancellationTokenSource
+import org.opencv.android.OpenCVLoader
 import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -53,6 +60,10 @@ fun CameraScreen(
 
     val orientation by viewModel.currentOrientation.collectAsState()
     val difference by viewModel.difference.collectAsState(initial = null)
+
+    LaunchedEffect(Unit) {
+        OpenCVLoader.initDebug()
+    }
 
     var permissionsGranted by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) {
@@ -120,6 +131,7 @@ fun CameraScreen(
         }
 
         val previewView = remember { PreviewView(context) }
+        val arrowBitmap = remember { CircumflexIcon.create(200).asImageBitmap() }
         val fusedClient = remember { LocationServices.getFusedLocationProviderClient(context) }
 
         LaunchedEffect(Unit) {
@@ -197,6 +209,12 @@ fun CameraScreen(
                 modifier = Modifier.fillMaxSize()
             )
 
+            Image(
+                bitmap = arrowBitmap,
+                contentDescription = null,
+                modifier = Modifier.align(Alignment.Center)
+            )
+
             val diff = difference
             val (label, color) = if (diff != null) {
                 val c = if (diff < 15f) Color.Green else Color.Red
@@ -209,7 +227,7 @@ fun CameraScreen(
                 label,
                 color = color,
                 modifier = Modifier
-                    .align(Alignment.Center)
+                    .align(Alignment.TopCenter)
                     .background(Color.Black.copy(alpha = 0.5f))
                     .padding(8.dp)
             )

@@ -24,6 +24,7 @@ firebaseFirestore = "25.1.4"
 googleServices = "4.4.2"
 guava = "31.1-android"
 firebaseUiAuth = "9.0.0"
+opencv = "4.5.2"
 
 
 [libraries]
@@ -59,6 +60,7 @@ firebase-auth-ktx = { group = "com.google.firebase", name = "firebase-auth-ktx",
 firebase-firestore-ktx = { group = "com.google.firebase", name = "firebase-firestore-ktx", version.ref = "firebaseFirestore" }
 firebase-ui-auth = { group = "com.firebaseui", name = "firebase-ui-auth", version.ref = "firebaseUiAuth" }
 guava = { group = "com.google.guava", name = "guava", version.ref = "guava" }
+opencv-android = { group = "ai.eye2you", name = "opencv-android", version.ref = "opencv" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
