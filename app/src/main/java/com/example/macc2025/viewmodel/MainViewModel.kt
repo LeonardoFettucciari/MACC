@@ -53,7 +53,11 @@ class CameraViewModel @Inject constructor(
         _difference.value = finalDiff
 
         val points = calculatePoints(finalDiff)
-        val uid = FirebaseAuth.getInstance().currentUser?.uid
+        val uid = try {
+            FirebaseAuth.getInstance().currentUser?.uid
+        } catch (_: Exception) {
+            null
+        }
         if (uid != null) {
             viewModelScope.launch {
                 try {
