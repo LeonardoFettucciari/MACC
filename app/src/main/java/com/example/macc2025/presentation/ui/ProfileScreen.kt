@@ -1,17 +1,20 @@
 package com.example.macc2025.presentation.ui
 
-import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
-import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Button
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
@@ -21,6 +24,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Edit
 import androidx.navigation.NavController
 import com.example.macc2025.presentation.viewmodel.ProfileViewModel
 import com.google.firebase.auth.FirebaseAuth
@@ -35,34 +40,51 @@ fun ProfileScreen(
     val usernameState = viewModel.username.collectAsState()
     val user = FirebaseAuth.getInstance().currentUser
     var newName by remember { mutableStateOf("") }
+    var editing by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = { CenterAlignedTopAppBar(title = { Text("Profile") }) }
     ) { inner ->
-        Column(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(inner)
-                .padding(16.dp),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
+                .padding(16.dp)
         ) {
-            Text("User: ${user?.email ?: ""}")
-            Text("Total points: ${points.value}")
-            Spacer(Modifier.height(16.dp))
-            OutlinedTextField(
-                value = newName.takeIf { it.isNotEmpty() } ?: (usernameState.value ?: ""),
-                onValueChange = { newName = it },
-                label = { Text("Username") }
-            )
-            Spacer(Modifier.height(8.dp))
-            Button(onClick = {
-                val n = newName.ifBlank { usernameState.value ?: "" }
-                if (n.isNotBlank()) {
-                    viewModel.updateUsername(n)
-                    newName = ""
+            Column(
+                modifier = Modifier.align(Alignment.TopCenter),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text("Email: ${user?.email ?: ""}")
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text("Username: ${usernameState.value ?: ""}")
+                    IconButton(onClick = { editing = true }) {
+                        Icon(Icons.Default.Edit, contentDescription = "Edit username")
+                    }
                 }
-            }) { Text("Save") }
+                if (editing) {
+                    Spacer(Modifier.height(16.dp))
+                    OutlinedTextField(
+                        value = newName.takeIf { it.isNotEmpty() } ?: (usernameState.value ?: ""),
+                        onValueChange = { newName = it },
+                        label = { Text("Username") }
+                    )
+                    Spacer(Modifier.height(8.dp))
+                    Button(onClick = {
+                        val n = newName.ifBlank { usernameState.value ?: "" }
+                        if (n.isNotBlank()) {
+                            viewModel.updateUsername(n)
+                            newName = ""
+                        }
+                        editing = false
+                    }) { Text("Save") }
+                }
+            }
+            Text(
+                text = "${points.value} points",
+                modifier = Modifier.align(Alignment.Center),
+                style = MaterialTheme.typography.headlineLarge
+            )
         }
     }
 }
