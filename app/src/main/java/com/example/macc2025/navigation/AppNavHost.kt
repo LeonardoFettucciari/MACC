@@ -100,6 +100,15 @@ fun AppNavHost() {
                     viewModel = viewModel
                 )
             }
+
+            // PROFILE SCREEN
+            composable("profile") {
+                val viewModel: ProfileViewModel = hiltViewModel()
+                ProfileScreen(
+                    navController = navController,
+                    viewModel = viewModel
+                )
+            }
         }
     }
 }
