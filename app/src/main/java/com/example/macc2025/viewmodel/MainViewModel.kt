@@ -65,7 +65,7 @@ class CameraViewModel @Inject constructor(
     }
 
     private fun calculatePoints(diff: Float): Int {
-        if (diff >= 50f) return 10
+        if (diff > 50f) return 0
         val k = ln(50.0) / 50.0
         return (500 * exp(-k * diff)).toInt()
     }
