@@ -86,7 +86,7 @@ fun SearchScreen(
                             }
                     ) {
                         ListItem(
-                            headlineText = {
+                            headlineContent = {
                                 Text(p.getFullText(null).toString())
                             }
                         )

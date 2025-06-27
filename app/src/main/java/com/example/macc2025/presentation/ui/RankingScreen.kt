@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.*
+import androidx.compose.material3.ListItem
 import androidx.compose.ui.Alignment
 import com.example.macc2025.presentation.ui.AppTopBar
 import com.example.macc2025.presentation.ui.AppBottomBar
@@ -23,7 +24,7 @@ fun RankingScreen(navController: NavController, viewModel: ProfileViewModel) {
     LaunchedEffect(Unit) { viewModel.loadRanking() }
 
     Scaffold(
-        topBar = { AppTopBar(title = "Ranking") },
+        topBar = { AppTopBar(title = "Leaderboard") },
         bottomBar = { AppBottomBar(navController) }
     ) { inner ->
         if (ranking.value.isEmpty()) {
@@ -39,8 +40,8 @@ fun RankingScreen(navController: NavController, viewModel: ProfileViewModel) {
                             .padding(vertical = 4.dp)
                     ) {
                         ListItem(
-                            headlineText = { Text("${index + 1}. $name") },
-                            supportingText = { Text("$pts pts") }
+                            headlineContent = { Text("${index + 1}. $name") },
+                            supportingContent = { Text("$pts pts") }
                         )
                     }
                 }

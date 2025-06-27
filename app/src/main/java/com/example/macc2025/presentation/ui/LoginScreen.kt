@@ -51,7 +51,7 @@ fun LoginScreen() {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            ElevatedCard {
+
                 Column(
                     modifier = Modifier.padding(16.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
@@ -66,7 +66,7 @@ fun LoginScreen() {
             }
         }
     }
-}
+
 
 @Composable
 fun GoogleSignInButton(
