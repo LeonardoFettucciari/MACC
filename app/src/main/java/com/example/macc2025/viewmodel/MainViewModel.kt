@@ -29,13 +29,11 @@ class CameraViewModel @Inject constructor(
     private val _difference = MutableStateFlow<Float?>(null)
     val difference: StateFlow<Float?> = _difference
 
-    fun setSelectedLocation(location: LatLng) {
-        _selectedLocation.value = location
-    }
+    private val _points = MutableStateFlow<Int?>(null)
+    val points: StateFlow<Int?> = _points
 
-    fun setCurrentLocation(location: LatLng) {
-        _currentLocation.value = location
-    }
+    private val _bearing = MutableStateFlow<Float?>(null)
+    val bearing: StateFlow<Float?> = _bearing
 
     fun updateOrientation(azimuth: Float) {
         _currentOrientation.value = azimuth
@@ -48,11 +46,13 @@ class CameraViewModel @Inject constructor(
 
     private fun computeDifference(start: LatLng, end: LatLng, locked: Float) {
         val bearing = calculateBearing(start, end)
+        _bearing.value = bearing
         val diff = (bearing - locked + 360) % 360
         val finalDiff = if (diff > 180) 360 - diff else diff
         _difference.value = finalDiff
 
         val points = calculatePoints(finalDiff)
+        _points.value = points
         val uid = try {
             FirebaseAuth.getInstance().currentUser?.uid
         } catch (_: Exception) {
@@ -77,6 +77,8 @@ class CameraViewModel @Inject constructor(
     fun reset() {
         _lockedOrientation.value = null
         _difference.value = null
+        _points.value = null
+        _bearing.value = null
     }
 
     private fun calculateBearing(start: LatLng, end: LatLng): Float {

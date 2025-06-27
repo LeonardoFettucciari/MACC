@@ -9,10 +9,9 @@ import org.opencv.core.Scalar
 import org.opencv.imgproc.Imgproc
 
 object CircumflexIcon {
-    fun create(size: Int = 200): Bitmap {
+    fun create(size: Int = 200, color: Scalar = Scalar(255.0, 0.0, 0.0, 255.0)): Bitmap {
         val mat = Mat.zeros(size, size, CvType.CV_8UC4)
         val center = size / 2.0
-        val color = Scalar(255.0, 0.0, 0.0, 255.0)
         val thickness = (size * 0.05).toInt()
         val offset = size * 0.1
         val p1 = Point(center - offset, center + offset)

@@ -50,6 +50,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.tasks.CancellationTokenSource
 import org.opencv.android.OpenCVLoader
+import org.opencv.core.Scalar
 import androidx.compose.ui.platform.LocalDensity
 import kotlin.math.roundToInt
 
@@ -64,6 +65,8 @@ fun CameraScreen(
 
     val orientation by viewModel.currentOrientation.collectAsState()
     val difference by viewModel.difference.collectAsState(initial = null)
+    val points by viewModel.points.collectAsState()
+    val bearing by viewModel.bearing.collectAsState()
 
     LaunchedEffect(Unit) {
         OpenCVLoader.initDebug()
@@ -116,6 +119,9 @@ fun CameraScreen(
 
         val previewView = remember { PreviewView(context) }
         val arrowBitmap = remember { CircumflexIcon.create(200).asImageBitmap() }
+        val correctArrowBitmap = remember {
+            CircumflexIcon.create(200, Scalar(0.0, 255.0, 0.0, 255.0)).asImageBitmap()
+        }
         val fusedClient = remember { LocationServices.getFusedLocationProviderClient(context) }
 
         LaunchedEffect(Unit) {
@@ -160,7 +166,8 @@ fun CameraScreen(
             onDispose { sm.unregisterListener(listener) }
         }
 
-        val handleTap = {
+        val handleTap = handle@{
+            if (viewModel.lockedOrientation.value != null) return@handle
             fun onLoc(loc: Location) {
                 viewModel.setCurrentLocation(LatLng(loc.latitude, loc.longitude))
                 viewModel.lockOrientation()
@@ -211,10 +218,25 @@ fun CameraScreen(
                 modifier = Modifier.align(Alignment.Center)
             )
 
+            bearing?.let { brg ->
+                val spacing = widthPx / 60f
+                var d = (brg - orientation + 360f) % 360f
+                if (d > 180f) d -= 360f
+                val clamped = d.coerceIn(-30f, 30f)
+                Image(
+                    bitmap = correctArrowBitmap,
+                    contentDescription = null,
+                    modifier = Modifier
+                        .align(Alignment.Center)
+                        .graphicsLayer { translationX = clamped * spacing }
+                )
+            }
+
             val diff = difference
-            val (label, color) = if (diff != null) {
+            val pts = points
+            val (label, color) = if (diff != null && pts != null) {
                 val c = if (diff < 15f) Color.Green else Color.Red
-                "Off by ${diff.roundToInt()}°" to c
+                "Off by ${diff.roundToInt()}° - $pts pts" to c
             } else {
                 "Heading: ${orientation.roundToInt()}°" to Color.White
             }
