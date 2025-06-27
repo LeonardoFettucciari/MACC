@@ -28,7 +28,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
 import androidx.navigation.NavController
 import com.example.macc2025.presentation.viewmodel.ProfileViewModel
+import com.example.macc2025.presentation.ui.AppTopBar
+import com.example.macc2025.presentation.ui.AppBottomBar
+import com.firebase.ui.auth.AuthUI
 import com.google.firebase.auth.FirebaseAuth
+import androidx.compose.ui.platform.LocalContext
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -39,11 +43,13 @@ fun ProfileScreen(
     val points = viewModel.points.collectAsState()
     val usernameState = viewModel.username.collectAsState()
     val user = FirebaseAuth.getInstance().currentUser
+    val context = LocalContext.current
     var newName by remember { mutableStateOf("") }
     var editing by remember { mutableStateOf(false) }
 
     Scaffold(
-        topBar = { CenterAlignedTopAppBar(title = { Text("Profile") }) }
+        topBar = { AppTopBar(title = "Profile") },
+        bottomBar = { AppBottomBar(navController) }
     ) { inner ->
         Box(
             modifier = Modifier
@@ -85,6 +91,14 @@ fun ProfileScreen(
                 modifier = Modifier.align(Alignment.Center),
                 style = MaterialTheme.typography.headlineLarge
             )
+            Button(
+                onClick = {
+                    AuthUI.getInstance().signOut(context)
+                    FirebaseAuth.getInstance().signOut()
+                },
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
+                modifier = Modifier.align(Alignment.BottomCenter)
+            ) { Text("Logout") }
         }
     }
 }

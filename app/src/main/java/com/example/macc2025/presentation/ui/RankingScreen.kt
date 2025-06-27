@@ -11,6 +11,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.lazy.itemsIndexed
 import com.example.macc2025.presentation.ui.AppTopBar
+import com.example.macc2025.presentation.ui.AppBottomBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -26,7 +27,10 @@ fun RankingScreen(navController: NavController, viewModel: ProfileViewModel) {
 
     LaunchedEffect(Unit) { viewModel.loadRanking() }
 
-    Scaffold(topBar = { AppTopBar(title = "Ranking", navController = navController) }) { inner ->
+    Scaffold(
+        topBar = { AppTopBar(title = "Ranking") },
+        bottomBar = { AppBottomBar(navController) }
+    ) { inner ->
         if (ranking.value.isEmpty()) {
             Box(Modifier.padding(inner).padding(16.dp).fillMaxWidth(), contentAlignment = Alignment.Center) {
                 Text("No ranking data")

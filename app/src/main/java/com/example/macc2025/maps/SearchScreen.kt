@@ -20,6 +20,8 @@ import com.example.macc2025.viewmodel.MainViewModel
 import com.google.android.libraries.places.api.model.AutocompletePrediction
 import com.example.macc2025.presentation.viewmodel.ProfileViewModel
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.macc2025.presentation.ui.AppTopBar
+import com.example.macc2025.presentation.ui.AppBottomBar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -46,34 +48,10 @@ fun SearchScreen(
 
     Scaffold(
         topBar = {
-            var menuExpanded by remember { mutableStateOf(false) }
-
-            CenterAlignedTopAppBar(
-                title = { Text("Search") },
-                actions = {
-                    IconButton(onClick = { menuExpanded = true }) {
-                        Icon(Icons.Default.MoreVert, contentDescription = "Menu")
-                    }
-                    DropdownMenu(
-                        expanded = menuExpanded,
-                        onDismissRequest = { menuExpanded = false }
-                    ) {
-                    DropdownMenuItem(text = { Text("Profile") }, onClick = {
-                        menuExpanded = false
-                        navController.navigate("profile")
-                    })
-                    DropdownMenuItem(text = { Text("Ranking") }, onClick = {
-                        menuExpanded = false
-                        navController.navigate("ranking")
-                    })
-                    DropdownMenuItem(text = { Text("Logout") }, onClick = {
-                        menuExpanded = false
-                        AuthUI.getInstance().signOut(context)
-                        FirebaseAuth.getInstance().signOut()
-                    })
-                    }
-                }
-            )
+            AppTopBar(title = "Search")
+        },
+        bottomBar = {
+            AppBottomBar(navController)
         }
     ) { innerPadding ->
         Column(

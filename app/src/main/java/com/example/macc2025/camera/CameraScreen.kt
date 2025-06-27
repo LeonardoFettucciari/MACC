@@ -40,6 +40,7 @@ import androidx.navigation.NavController
 import com.example.macc2025.presentation.viewmodel.CameraViewModel
 import com.example.macc2025.presentation.viewmodel.SearchViewModel
 import com.example.macc2025.utils.camera.getCameraProvider
+import com.example.macc2025.presentation.ui.AppBottomBar
 import com.example.macc2025.utils.graphics.CircumflexIcon
 import com.example.macc2025.utils.graphics.HorizonTicks
 import com.google.android.gms.location.LocationServices
@@ -90,29 +91,9 @@ fun CameraScreen(
 
     Scaffold(
         topBar = {
-            CenterAlignedTopAppBar(
-                title = { Text("Camera") },
-                actions = {
-                    IconButton(onClick = { menuExpanded = true }) {
-                        Icon(Icons.Default.MoreVert, contentDescription = "Menu")
-                    }
-                    DropdownMenu(
-                        expanded = menuExpanded,
-                        onDismissRequest = { menuExpanded = false }
-                    ) {
-                        DropdownMenuItem(text = { Text("Profile") }, onClick = {
-                            menuExpanded = false
-                            navController.navigate("profile")
-                        })
-                        DropdownMenuItem(text = { Text("Logout") }, onClick = {
-                            menuExpanded = false
-                            AuthUI.getInstance().signOut(context)
-                            FirebaseAuth.getInstance().signOut()
-                        })
-                    }
-                }
-            )
-        }
+            AppTopBar(title = "Camera")
+        },
+        bottomBar = { AppBottomBar(navController) }
     ) { innerPadding ->
         if (!permissionsGranted) {
             Box(

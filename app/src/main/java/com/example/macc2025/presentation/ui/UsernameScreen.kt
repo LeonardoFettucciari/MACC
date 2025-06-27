@@ -19,7 +19,7 @@ import com.example.macc2025.presentation.viewmodel.ProfileViewModel
 fun UsernameScreen(navController: NavController, viewModel: ProfileViewModel) {
     var username by remember { mutableStateOf("") }
 
-    Scaffold(topBar = { CenterAlignedTopAppBar(title = { Text("Choose Username") }) }) { inner ->
+    Scaffold(topBar = { AppTopBar(title = "Choose Username") }) { inner ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
