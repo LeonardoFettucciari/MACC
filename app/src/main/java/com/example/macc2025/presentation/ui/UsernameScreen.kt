@@ -1,12 +1,7 @@
 package com.example.macc2025.presentation.ui
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.Button
-import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -28,20 +23,24 @@ fun UsernameScreen(navController: NavController, viewModel: ProfileViewModel) {
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            OutlinedTextField(
-                value = username,
-                onValueChange = { username = it },
-                label = { Text("Username") }
-            )
-            Spacer(Modifier.height(16.dp))
-            Button(onClick = {
-                if (username.isNotBlank()) {
-                    viewModel.updateUsername(username)
-                    navController.navigate("search") {
-                        popUpTo("username") { inclusive = true }
-                    }
+            ElevatedCard {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    OutlinedTextField(
+                        value = username,
+                        onValueChange = { username = it },
+                        label = { Text("Username") }
+                    )
+                    Spacer(Modifier.height(16.dp))
+                    Button(onClick = {
+                        if (username.isNotBlank()) {
+                            viewModel.updateUsername(username)
+                            navController.navigate("search") {
+                                popUpTo("username") { inclusive = true }
+                            }
+                        }
+                    }) { Text("Continue") }
                 }
-            }) { Text("Continue") }
+            }
         }
     }
 }

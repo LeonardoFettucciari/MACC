@@ -1,8 +1,9 @@
 package com.example.macc2025.presentation.ui
 
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Scaffold
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CameraAlt
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavController
 import com.example.macc2025.presentation.viewmodel.MapViewModel
@@ -27,7 +28,12 @@ fun MapScreen(
 
     Scaffold(
         topBar = { AppTopBar(title = "Map") },
-        bottomBar = { AppBottomBar(navController) }
+        bottomBar = { AppBottomBar(navController) },
+        floatingActionButton = {
+            FloatingActionButton(onClick = { navController.navigate("camera") }) {
+                Icon(Icons.Default.CameraAlt, contentDescription = "Open Camera")
+            }
+        }
     ) { inner ->
         GoogleMap(
             modifier = androidx.compose.ui.Modifier

@@ -2,14 +2,9 @@ package com.example.macc2025.presentation.ui
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.ui.Alignment
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.material3.*
+import androidx.compose.ui.Alignment
 import com.example.macc2025.presentation.ui.AppTopBar
 import com.example.macc2025.presentation.ui.AppBottomBar
 import androidx.compose.runtime.Composable
@@ -38,12 +33,15 @@ fun RankingScreen(navController: NavController, viewModel: ProfileViewModel) {
         } else {
             LazyColumn(modifier = Modifier.padding(inner).padding(16.dp)) {
                 itemsIndexed(ranking.value) { index, (name, pts) ->
-                    Row(
-                        modifier = Modifier.fillMaxWidth().padding(8.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween
+                    ElevatedCard(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 4.dp)
                     ) {
-                        Text("${index + 1}. $name")
-                        Text("$pts")
+                        ListItem(
+                            headlineText = { Text("${index + 1}. $name") },
+                            supportingText = { Text("$pts pts") }
+                        )
                     }
                 }
             }

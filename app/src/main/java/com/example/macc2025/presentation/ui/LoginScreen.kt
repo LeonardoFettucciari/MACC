@@ -51,11 +51,18 @@ fun LoginScreen() {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            GoogleSignInButton(onClick = signIn)
+            ElevatedCard {
+                Column(
+                    modifier = Modifier.padding(16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    GoogleSignInButton(onClick = signIn)
 
-            errorMessage?.let {
-                Spacer(Modifier.height(8.dp))
-                Text(it, color = MaterialTheme.colorScheme.error)
+                    errorMessage?.let {
+                        Spacer(Modifier.height(8.dp))
+                        Text(it, color = MaterialTheme.colorScheme.error)
+                    }
+                }
             }
         }
     }
@@ -66,7 +73,7 @@ fun GoogleSignInButton(
     text: String = "Continue with Google",
     onClick: () -> Unit
 ) {
-    Button(
+    ElevatedButton(
         onClick = onClick,
         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF2F2F2)),
         shape = RoundedCornerShape(24.dp),

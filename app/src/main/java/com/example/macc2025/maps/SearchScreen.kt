@@ -75,17 +75,22 @@ fun SearchScreen(
 
             LazyColumn {
                 items(predictions) { p ->
-                    Text(
-                        text = p.getFullText(null).toString(),
+                    ElevatedCard(
                         modifier = Modifier
                             .fillMaxWidth()
+                            .padding(vertical = 4.dp)
                             .clickable {
                                 viewModel.fetchPlace(p.placeId) {
                                     navController.navigate("camera")
                                 }
                             }
-                            .padding(8.dp)
-                    )
+                    ) {
+                        ListItem(
+                            headlineText = {
+                                Text(p.getFullText(null).toString())
+                            }
+                        )
+                    }
                 }
             }
         }

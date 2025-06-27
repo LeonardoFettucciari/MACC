@@ -229,7 +229,7 @@ fun CameraScreen(
             )
 
             diff?.let {
-                Button(
+                FilledTonalButton(
                     onClick = {
                         viewModel.reset()
                         navController.navigate("search") {
