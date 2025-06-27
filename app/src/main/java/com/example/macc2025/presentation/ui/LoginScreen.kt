@@ -13,15 +13,21 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.macc2025.R
+import com.google.firebase.auth.FirebaseAuth
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginScreen() {
     val context = LocalContext.current
     var errorMessage by remember { mutableStateOf<String?>(null) }
+    var email by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+
+    val auth = remember { FirebaseAuth.getInstance() }
 
     val launcher = rememberLauncherForActivityResult(
         FirebaseAuthUIActivityResultContract()
@@ -31,13 +37,23 @@ fun LoginScreen() {
         }
     }
 
-    val signIn = {
+    val googleSignIn = {
         val providers = arrayListOf(AuthUI.IdpConfig.GoogleBuilder().build())
         val intent = AuthUI.getInstance()
             .createSignInIntentBuilder()
             .setAvailableProviders(providers)
             .build()
         launcher.launch(intent)
+    }
+
+    val emailSignIn = {
+        auth.signInWithEmailAndPassword(email.trim(), password)
+            .addOnFailureListener { errorMessage = it.localizedMessage }
+    }
+
+    val emailSignUp = {
+        auth.createUserWithEmailAndPassword(email.trim(), password)
+            .addOnFailureListener { errorMessage = it.localizedMessage }
     }
 
     Scaffold(
@@ -51,21 +67,36 @@ fun LoginScreen() {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
+            OutlinedTextField(
+                value = email,
+                onValueChange = { email = it },
+                label = { Text("Email") }
+            )
+            Spacer(Modifier.height(8.dp))
+            OutlinedTextField(
+                value = password,
+                onValueChange = { password = it },
+                label = { Text("Password") },
+                visualTransformation = PasswordVisualTransformation()
+            )
+            Spacer(Modifier.height(16.dp))
+            Row {
+                Button(onClick = emailSignIn) { Text("Sign In") }
+                Spacer(Modifier.width(8.dp))
+                OutlinedButton(onClick = emailSignUp) { Text("Sign Up") }
+            }
 
-                Column(
-                    modifier = Modifier.padding(16.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    GoogleSignInButton(onClick = signIn)
+            Spacer(Modifier.height(24.dp))
 
-                    errorMessage?.let {
-                        Spacer(Modifier.height(8.dp))
-                        Text(it, color = MaterialTheme.colorScheme.error)
-                    }
-                }
+            GoogleSignInButton(onClick = googleSignIn)
+
+            errorMessage?.let {
+                Spacer(Modifier.height(8.dp))
+                Text(it, color = MaterialTheme.colorScheme.error)
             }
         }
     }
+}
 
 
 @Composable

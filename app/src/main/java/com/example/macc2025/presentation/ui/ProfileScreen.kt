@@ -1,12 +1,6 @@
 package com.example.macc2025.presentation.ui
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -19,7 +13,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material3.ButtonDefaults
 import androidx.navigation.NavController
 import com.example.macc2025.presentation.viewmodel.ProfileViewModel
 import com.example.macc2025.presentation.ui.AppTopBar
@@ -27,6 +20,7 @@ import com.example.macc2025.presentation.ui.AppBottomBar
 import com.firebase.ui.auth.AuthUI
 import com.google.firebase.auth.FirebaseAuth
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -40,6 +34,9 @@ fun ProfileScreen(
     val context = LocalContext.current
     var newName by remember { mutableStateOf("") }
     var editing by remember { mutableStateOf(false) }
+    var newPassword by remember { mutableStateOf("") }
+    var editingPassword by remember { mutableStateOf(false) }
+    var message by remember { mutableStateOf<String?>(null) }
 
     Scaffold(
         topBar = { AppTopBar(title = "Profile") },
@@ -59,14 +56,18 @@ fun ProfileScreen(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text("Email: ${user?.email ?: ""}")
+
+                    Spacer(Modifier.height(8.dp))
+
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text("Username: ${usernameState.value ?: ""}")
                         IconButton(onClick = { editing = true }) {
                             Icon(Icons.Default.Edit, contentDescription = "Edit username")
                         }
                     }
+
                     if (editing) {
-                        Spacer(Modifier.height(16.dp))
+                        Spacer(Modifier.height(8.dp))
                         OutlinedTextField(
                             value = newName.takeIf { it.isNotEmpty() } ?: (usernameState.value ?: ""),
                             onValueChange = { newName = it },
@@ -81,6 +82,36 @@ fun ProfileScreen(
                             }
                             editing = false
                         }) { Text("Save") }
+                    }
+
+                    Divider(modifier = Modifier.padding(vertical = 16.dp))
+
+                    if (editingPassword) {
+                        OutlinedTextField(
+                            value = newPassword,
+                            onValueChange = { newPassword = it },
+                            label = { Text("New Password") },
+                            visualTransformation = PasswordVisualTransformation()
+                        )
+                        Spacer(Modifier.height(8.dp))
+                        Button(onClick = {
+                            user?.updatePassword(newPassword)
+                                ?.addOnSuccessListener {
+                                    message = "Password updated"
+                                    editingPassword = false
+                                    newPassword = ""
+                                }
+                                ?.addOnFailureListener { e -> message = e.localizedMessage }
+                        }) { Text("Save Password") }
+                    } else {
+                        OutlinedButton(onClick = { editingPassword = true }) {
+                            Text("Change Password")
+                        }
+                    }
+
+                    message?.let {
+                        Spacer(Modifier.height(8.dp))
+                        Text(it, color = MaterialTheme.colorScheme.primary)
                     }
                 }
             }
