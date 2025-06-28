@@ -19,6 +19,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "MACC2025"
+rootProject.name = "MACC"
 include(":app")
  

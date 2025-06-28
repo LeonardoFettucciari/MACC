@@ -8,11 +8,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.macc2025"
+    namespace = "com.example.macc"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.example.macc2025"
+        applicationId = "com.example.macc"
         minSdk = 24
         targetSdk = 35
         versionCode = 1
