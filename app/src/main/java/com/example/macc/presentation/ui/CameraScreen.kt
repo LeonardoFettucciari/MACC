@@ -50,6 +50,7 @@ import org.opencv.android.OpenCVLoader
 import org.opencv.core.Scalar
 import androidx.compose.ui.platform.LocalDensity
 import kotlin.math.roundToInt
+import com.example.macc.presentation.ui.components.RichTooltip
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -91,7 +92,14 @@ fun CameraScreen(
 
     Scaffold(
         topBar = {
-            AppTopBar(title = "Camera")
+            RichTooltip(
+                prefKey = "camera_tooltip",
+                richTooltipSubheadText = "Guess the place direction",
+                richTooltipText = "Nice choice! Now turn around and try guessing where the place is. When you think you got it, tap the screen!"
+
+            ) {
+                AppTopBar(title = "Camera")
+            }
         },
         bottomBar = { AppBottomBar(navController) }
     ) { innerPadding ->
@@ -147,10 +155,34 @@ fun CameraScreen(
                     val rot = wm.defaultDisplay.rotation
                     val remap = FloatArray(9)
                     when (rot) {
-                        Surface.ROTATION_0 -> SensorManager.remapCoordinateSystem(raw, SensorManager.AXIS_X, SensorManager.AXIS_Z, remap)
-                        Surface.ROTATION_90 -> SensorManager.remapCoordinateSystem(raw, SensorManager.AXIS_Z, SensorManager.AXIS_MINUS_X, remap)
-                        Surface.ROTATION_180 -> SensorManager.remapCoordinateSystem(raw, SensorManager.AXIS_MINUS_X, SensorManager.AXIS_MINUS_Z, remap)
-                        Surface.ROTATION_270 -> SensorManager.remapCoordinateSystem(raw, SensorManager.AXIS_MINUS_Z, SensorManager.AXIS_X, remap)
+                        Surface.ROTATION_0 -> SensorManager.remapCoordinateSystem(
+                            raw,
+                            SensorManager.AXIS_X,
+                            SensorManager.AXIS_Z,
+                            remap
+                        )
+
+                        Surface.ROTATION_90 -> SensorManager.remapCoordinateSystem(
+                            raw,
+                            SensorManager.AXIS_Z,
+                            SensorManager.AXIS_MINUS_X,
+                            remap
+                        )
+
+                        Surface.ROTATION_180 -> SensorManager.remapCoordinateSystem(
+                            raw,
+                            SensorManager.AXIS_MINUS_X,
+                            SensorManager.AXIS_MINUS_Z,
+                            remap
+                        )
+
+                        Surface.ROTATION_270 -> SensorManager.remapCoordinateSystem(
+                            raw,
+                            SensorManager.AXIS_MINUS_Z,
+                            SensorManager.AXIS_X,
+                            remap
+                        )
+
                         else -> System.arraycopy(raw, 0, remap, 0, 9)
                     }
                     val o = FloatArray(3)
@@ -199,23 +231,25 @@ fun CameraScreen(
                 HorizonTicks.create(orientation.roundToInt(), widthPx).asImageBitmap()
             }
 
+            // CAMERA PREVIEW LAYER
+            AndroidView(
+                factory = {
+                    previewView.apply {
+                        setOnTouchListener { _, ev ->
+                            if (ev.action == MotionEvent.ACTION_UP && isUpright) handleTap()
+                            true
+                        }
+                    }
+                },
+                modifier = Modifier.fillMaxSize()
+            )
+
+            // HUD & OVERLAYS
             Box(
                 Modifier
                     .fillMaxSize()
                     .let { if (!isUpright) it.blur(16.dp) else it }
             ) {
-                AndroidView(
-                    factory = {
-                        previewView.apply {
-                            setOnTouchListener { _, ev ->
-                                if (ev.action == MotionEvent.ACTION_UP && isUpright) handleTap()
-                                true
-                            }
-                        }
-                    },
-                    modifier = Modifier.fillMaxSize()
-                )
-
                 Image(
                     bitmap = ticksBitmap,
                     contentDescription = null,
@@ -243,14 +277,11 @@ fun CameraScreen(
                     )
                 }
 
-                val diff = difference
-                val pts = points
-                val (label, color) = if (diff != null && pts != null) {
+                val (label, color) = difference?.let { diff ->
+                    val pts = points
                     val c = if (diff < 15f) Color.Green else Color.Red
-                    "Off by ${diff.roundToInt()}\u00b0 - $pts pts" to c
-                } else {
-                    "Heading: ${orientation.roundToInt()}\u00b0" to Color.White
-                }
+                    "Off by ${diff.roundToInt()}° - $pts pts" to c
+                } ?: ("Heading: ${orientation.roundToInt()}°" to Color.White)
 
                 Text(
                     label,
@@ -260,24 +291,37 @@ fun CameraScreen(
                         .background(Color.Black.copy(alpha = 0.5f))
                         .padding(8.dp)
                 )
+            }
 
-                diff?.let {
-                    FilledTonalButton(
-                        onClick = {
-                            viewModel.reset()
-                            navController.navigate("search") {
-                                popUpTo("search") { inclusive = true }
-                            }
-                        },
-                        modifier = Modifier
-                            .align(Alignment.BottomCenter)
-                            .padding(16.dp)
+            // START OVER BUTTON WITH TOOLTIP
+            if (difference != null) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize(),
+                    contentAlignment = Alignment.BottomCenter
+                ) {
+                    RichTooltip(
+                        prefKey = "startover_tooltip",
+                        richTooltipSubheadText = "Search a new location",
+                        richTooltipText = "Great job! If you want to try other locations, just tap this button and start searching for new places!"
                     ) {
-                        Text("Start Over")
+                        FilledTonalButton(
+                            onClick = {
+                                viewModel.reset()
+                                navController.navigate("search") {
+                                    popUpTo("search") { inclusive = true }
+                                }
+                            },
+                            modifier = Modifier
+                                .padding(16.dp)
+                        ) {
+                            Text("Start Over")
+                        }
                     }
                 }
             }
 
+            // UPRIGHT OVERLAY (BLOCK UI IF TILTED)
             if (!isUpright) {
                 Box(
                     Modifier
@@ -297,5 +341,7 @@ fun CameraScreen(
                 }
             }
         }
+
     }
 }
+

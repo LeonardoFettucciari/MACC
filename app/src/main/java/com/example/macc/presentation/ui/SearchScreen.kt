@@ -17,6 +17,7 @@ import com.example.macc.presentation.viewmodel.ProfileViewModel
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.macc.presentation.ui.AppTopBar
 import com.example.macc.presentation.ui.AppBottomBar
+import com.example.macc.presentation.ui.components.RichTooltip
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -54,15 +55,24 @@ fun SearchScreen(
                 .padding(innerPadding)
                 .padding(16.dp)
         ) {
-            OutlinedTextField(
-                value = query,
-                onValueChange = {
-                    query = it
-                    viewModel.search(it)
-                },
-                modifier = Modifier.fillMaxWidth(),
-                label = { Text("Search location") }
-            )
+            RichTooltip(
+                prefKey = "search_tooltip",
+                richTooltipSubheadText = "Search a location",
+                richTooltipText = "Hello there! Start by typing a place, e.g. street or monument, then select it from the list."
+
+            ){
+                OutlinedTextField(
+                    value = query,
+                    onValueChange = {
+                        query = it
+                        viewModel.search(it)
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    label = { Text("Search location") }
+                )
+
+            }
+
 
             errorMessage?.let {
                 Text(it, color = MaterialTheme.colorScheme.error)

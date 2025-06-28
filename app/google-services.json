@@ -46,7 +46,7 @@
       "client_info": {
         "mobilesdk_app_id": "1:417770066399:android:12f65acdfe787b8d2b746a",
         "android_client_info": {
-          "package_name": "com.example.macc"
+          "package_name": "com.example.macc2025"
         }
       },
       "oauth_client": [
@@ -54,7 +54,7 @@
           "client_id": "417770066399-kfm96vgpb0vjnf3ftv966q2qmj6hkm13.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.example.macc",
+            "package_name": "com.example.macc2025",
             "certificate_hash": "7335ab62d4b1b62b717e2ab93190dce5943ef0c7"
           }
         },
