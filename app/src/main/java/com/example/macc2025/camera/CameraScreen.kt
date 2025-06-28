@@ -17,12 +17,7 @@ import androidx.camera.core.Preview
 import androidx.camera.view.PreviewView
 import androidx.compose.foundation.background
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -194,92 +189,103 @@ fun CameraScreen(
                 HorizonTicks.create(orientation.roundToInt(), widthPx).asImageBitmap()
             }
 
-            AndroidView(
-                factory = {
-                    previewView.apply {
-                        setOnTouchListener { _, ev ->
-                            if (ev.action == MotionEvent.ACTION_UP) handleTap()
-                            true
-                        }
-                    }
-                },
-                modifier = Modifier.fillMaxSize()
-            )
-
-            Image(
-                bitmap = ticksBitmap,
-                contentDescription = null,
-                modifier = Modifier.align(Alignment.Center)
-            )
-
-            Image(
-                bitmap = arrowBitmap,
-                contentDescription = null,
-                modifier = Modifier.align(Alignment.Center)
-            )
-
-            bearing?.let { brg ->
-                val spacing = widthPx / 60f
-                var d = (brg - orientation + 360f) % 360f
-                if (d > 180f) d -= 360f
-                val clamped = d.coerceIn(-30f, 30f)
-                Image(
-                    bitmap = correctArrowBitmap,
-                    contentDescription = null,
-                    modifier = Modifier
-                        .align(Alignment.Center)
-                        .graphicsLayer { translationX = clamped * spacing }
-                )
-            }
-
-            val diff = difference
-            val pts = points
-            val (label, color) = if (diff != null && pts != null) {
-                val c = if (diff < 15f) Color.Green else Color.Red
-                "Off by ${diff.roundToInt()}° - $pts pts" to c
-            } else {
-                "Heading: ${orientation.roundToInt()}°" to Color.White
-            }
-
-            Text(
-                label,
-                color = color,
-                modifier = Modifier
-                    .align(Alignment.TopCenter)
-                    .background(Color.Black.copy(alpha = 0.5f))
-                    .padding(8.dp)
-            )
-
-            diff?.let {
-                FilledTonalButton(
-                    onClick = {
-                        viewModel.reset()
-                        navController.navigate("search") {
-                            popUpTo("search") { inclusive = true }
+            Box(
+                Modifier
+                    .fillMaxSize()
+                    .let { if (!isUpright) it.blur(16.dp) else it }
+            ) {
+                AndroidView(
+                    factory = {
+                        previewView.apply {
+                            setOnTouchListener { _, ev ->
+                                if (ev.action == MotionEvent.ACTION_UP && isUpright) handleTap()
+                                true
+                            }
                         }
                     },
+                    modifier = Modifier.fillMaxSize()
+                )
+
+                Image(
+                    bitmap = ticksBitmap,
+                    contentDescription = null,
+                    modifier = Modifier.align(Alignment.Center)
+                )
+
+                Image(
+                    bitmap = arrowBitmap,
+                    contentDescription = null,
+                    modifier = Modifier.align(Alignment.Center)
+                )
+
+                bearing?.let { brg ->
+                    val spacing = widthPx / 60f
+                    var d = (brg - orientation + 360f) % 360f
+                    if (d > 180f) d -= 360f
+                    val clamped = d.coerceIn(-30f, 30f)
+
+                    Image(
+                        bitmap = correctArrowBitmap,
+                        contentDescription = null,
+                        modifier = Modifier
+                            .align(Alignment.Center)
+                            .graphicsLayer { translationX = clamped * spacing }
+                    )
+                }
+
+                val diff = difference
+                val pts = points
+                val (label, color) = if (diff != null && pts != null) {
+                    val c = if (diff < 15f) Color.Green else Color.Red
+                    "Off by ${diff.roundToInt()}\u00b0 - $pts pts" to c
+                } else {
+                    "Heading: ${orientation.roundToInt()}\u00b0" to Color.White
+                }
+
+                Text(
+                    label,
+                    color = color,
                     modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .padding(16.dp)
-                ) {
-                    Text("Start Over")
+                        .align(Alignment.TopCenter)
+                        .background(Color.Black.copy(alpha = 0.5f))
+                        .padding(8.dp)
+                )
+
+                diff?.let {
+                    FilledTonalButton(
+                        onClick = {
+                            viewModel.reset()
+                            navController.navigate("search") {
+                                popUpTo("search") { inclusive = true }
+                            }
+                        },
+                        modifier = Modifier
+                            .align(Alignment.BottomCenter)
+                            .padding(16.dp)
+                    ) {
+                        Text("Start Over")
+                    }
                 }
             }
-        }
-    } else {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color.Black),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = "Camera and location permissions are required to use this feature.",
-                color = Color.White,
-                modifier = Modifier
-                    .background(Color.Black.copy(alpha = 0.5f))
-                    .padding(8.dp)
-            )
+
+            if (!isUpright) {
+                Box(
+                    Modifier
+                        .fillMaxSize()
+                        .zIndex(1f)
+                        .background(Color.Black.copy(alpha = 0.3f)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        "Hold the device upright",
+                        style = MaterialTheme.typography.headlineLarge,
+                        color = Color.White,
+                        modifier = Modifier
+                            .background(Color.Black.copy(alpha = 0.7f), RoundedCornerShape(8.dp))
+                            .padding(24.dp)
+                    )
+                }
+            }
         }
     }
 }
