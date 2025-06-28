@@ -1,6 +1,6 @@
 
 <div align="center">
-  <img src="https://github.com/LeonardoFettucciari/MACC/master/assets/logo.png" width="100" height="100">
+  <img src="https://github.com/LeonardoFettucciari/MACC/blob/master/assets/logo.png" width="100" height="100">
 </div>
 
 <div align="center">
