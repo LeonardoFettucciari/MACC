@@ -12,6 +12,8 @@ import android.location.Location
 import android.view.MotionEvent
 import android.view.Surface
 import android.view.WindowManager
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.Preview
 import androidx.camera.view.PreviewView
@@ -33,7 +35,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.zIndex
 import kotlin.math.absoluteValue
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
 import com.example.macc.presentation.viewmodel.CameraViewModel
@@ -73,6 +74,13 @@ fun CameraScreen(
     }
 
     var permissionsGranted by remember { mutableStateOf(false) }
+    val permissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { perms ->
+        val camOk = perms[Manifest.permission.CAMERA] == true
+        val locOk = perms[Manifest.permission.ACCESS_FINE_LOCATION] == true
+        permissionsGranted = camOk && locOk
+    }
     LaunchedEffect(Unit) {
         val camOk = ContextCompat.checkSelfPermission(
             context, Manifest.permission.CAMERA
@@ -82,11 +90,10 @@ fun CameraScreen(
         ) == PackageManager.PERMISSION_GRANTED
         permissionsGranted = camOk && locOk
         if (!permissionsGranted) {
-            ActivityCompat.requestPermissions(
-                context as Activity,
-                arrayOf(Manifest.permission.CAMERA, Manifest.permission.ACCESS_FINE_LOCATION),
-                0
-            )
+            permissionLauncher.launch(arrayOf(
+                Manifest.permission.CAMERA,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ))
         }
     }
 
@@ -129,7 +136,8 @@ fun CameraScreen(
         }
         val fusedClient = remember { LocationServices.getFusedLocationProviderClient(context) }
 
-        LaunchedEffect(Unit) {
+        LaunchedEffect(permissionsGranted) {
+            if (!permissionsGranted) return@LaunchedEffect
             val camProvider = context.getCameraProvider()
             val preview = Preview.Builder()
                 .build()
