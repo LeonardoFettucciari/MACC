@@ -59,4 +59,13 @@ class UserRepositoryImpl(
             }
             .addOnFailureListener { e -> cont.resumeWithException(e) }
     }
+
+    override suspend fun deleteUser(uid: String) = suspendCancellableCoroutine<Unit> { cont ->
+        firestore.collection("users")
+            .document(uid)
+            .delete()
+            .addOnSuccessListener { cont.resume(Unit) }
+            .addOnFailureListener { e -> cont.resumeWithException(e) }
+    }
+
 }

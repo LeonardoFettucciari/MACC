@@ -2,12 +2,7 @@ package com.example.macc.presentation.ui
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -42,6 +37,10 @@ fun ProfileScreen(
     var oldPassword by remember { mutableStateOf("") }
     var editingPassword by remember { mutableStateOf(false) }
     var message by remember { mutableStateOf<String?>(null) }
+
+    var showDeleteDialog by remember { mutableStateOf(false) }
+    var deletePwd by remember { mutableStateOf("") }
+    var deletePwdError by remember { mutableStateOf<String?>(null) }
 
     Scaffold(
         topBar = { AppTopBar(title = "Profile") },
@@ -91,7 +90,6 @@ fun ProfileScreen(
                                             newName = ""
                                             message = "Username updated"
                                         }
-
                                     }) {
                                         Icon(Icons.Default.Check, contentDescription = "Save username")
                                     }
@@ -99,7 +97,6 @@ fun ProfileScreen(
                                         editing = false
                                         newName = ""
                                         message = null
-
                                     }) {
                                         Icon(Icons.Default.Close, contentDescription = "Cancel")
                                     }
@@ -168,7 +165,6 @@ fun ProfileScreen(
                                             newPassword = ""
                                             oldPassword = ""
                                             message = null
-
                                         }) {
                                             Icon(Icons.Default.Close, contentDescription = "Cancel")
                                         }
@@ -191,7 +187,72 @@ fun ProfileScreen(
                 }
             }
 
-            Spacer(Modifier.weight(1f))
+            if (showDeleteDialog) {
+                AlertDialog(
+                    onDismissRequest = {
+                        showDeleteDialog = false
+                        deletePwd = ""
+                        deletePwdError = null
+                    },
+                    confirmButton = {
+                        TextButton(onClick = {
+                            if (deletePwd.isBlank()) {
+                                deletePwdError = "Password required"
+                                return@TextButton
+                            }
+                            viewModel.deleteAccount(deletePwd) { ok, err ->
+                                if (ok) {
+                                } else {
+                                    deletePwdError = err
+                                }
+                            }
+                        }) { Text("Delete") }
+                    },
+                    dismissButton = {
+                        TextButton(onClick = {
+                            showDeleteDialog = false
+                            deletePwd = ""
+                            deletePwdError = null
+                        }) { Text("Cancel") }
+                    },
+                    title = { Text("Delete account?") },
+                    text = {
+                        Column {
+                            Text("This action is irreversible. Enter your password to confirm.")
+                            Spacer(Modifier.height(8.dp))
+                            OutlinedTextField(
+                                value = deletePwd,
+                                onValueChange = {
+                                    deletePwd = it
+                                    deletePwdError = null
+                                },
+                                label = { Text("Password") },
+                                isError = deletePwdError != null,
+                                visualTransformation = PasswordVisualTransformation()
+                            )
+                            deletePwdError?.let {
+                                Spacer(Modifier.height(4.dp))
+                                Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error)
+                            }
+                        }
+                    }
+                )
+            }
+
+            Spacer(Modifier.height(16.dp))
+
+            FilledTonalButton(
+                onClick = { showDeleteDialog = true },
+                colors = ButtonDefaults.filledTonalButtonColors(
+                    containerColor = MaterialTheme.colorScheme.errorContainer,
+                    contentColor = MaterialTheme.colorScheme.onErrorContainer
+                ),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Delete Account")
+            }
+
+            Spacer(Modifier.height(8.dp))
 
             FilledTonalButton(
                 onClick = {

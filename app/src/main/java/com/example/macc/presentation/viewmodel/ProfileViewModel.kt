@@ -3,6 +3,7 @@ package com.example.macc.presentation.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.macc.domain.repository.UserRepository
+import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -71,4 +72,33 @@ class ProfileViewModel @Inject constructor(
             } catch (_: Exception) { }
         }
     }
+
+    fun deleteAccount(
+        password: String,
+        onResult: (Boolean, String?) -> Unit
+    ) {
+        val user = FirebaseAuth.getInstance().currentUser
+            ?: return onResult(false, "No user")
+
+        val email = user.email
+            ?: return onResult(false, "Email not found")
+
+        val credential = EmailAuthProvider.getCredential(email, password)
+        user.reauthenticate(credential)
+            .addOnSuccessListener {
+
+                user.delete()
+                    .addOnSuccessListener {
+
+                        viewModelScope.launch {
+                            try { userRepository.deleteUser(user.uid) } catch (_: Exception) { }
+                            onResult(true, null)
+                        }
+                    }
+                    .addOnFailureListener { e -> onResult(false, e.localizedMessage) }
+            }
+            .addOnFailureListener { e -> onResult(false, e.localizedMessage) }
+    }
+
+
 }
