@@ -1,18 +1,20 @@
 package com.example.macc.presentation.ui
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.example.macc.R
 import com.example.macc.presentation.viewmodel.SearchViewModel
-import com.google.android.libraries.places.api.model.AutocompletePrediction
 import com.example.macc.presentation.viewmodel.ProfileViewModel
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.macc.presentation.ui.AppTopBar
@@ -50,51 +52,63 @@ fun SearchScreen(
             AppBottomBar(navController)
         }
     ) { innerPadding ->
-        Column(
-            Modifier
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
                 .padding(innerPadding)
-                .padding(16.dp)
         ) {
-            RichTooltip(
-                prefKey = "search_tooltip",
-                richTooltipSubheadText = "Search a location",
-                richTooltipText = "Hello there! Start by typing a place, e.g. street or monument, then select it from the list."
 
-            ){
-                OutlinedTextField(
-                    value = query,
-                    onValueChange = {
-                        query = it
-                        viewModel.search(it)
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    label = { Text("Search location") }
-                )
+            Image(
+                painter = painterResource(id = R.drawable.background_orientap),
+                contentDescription = null,
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .graphicsLayer(alpha = 0.5f)
+            )
 
-            }
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp)
+            ) {
+                RichTooltip(
+                    prefKey = "search_tooltip",
+                    richTooltipSubheadText = "Search a location",
+                    richTooltipText = "Hello there! Start by typing a place, e.g. street or monument, then select it from the list."
+                ) {
+                    OutlinedTextField(
+                        value = query,
+                        onValueChange = {
+                            query = it
+                            viewModel.search(it)
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        label = { Text("Search location") }
+                    )
+                }
 
+                errorMessage?.let {
+                    Text(it, color = MaterialTheme.colorScheme.error)
+                }
 
-            errorMessage?.let {
-                Text(it, color = MaterialTheme.colorScheme.error)
-            }
-
-            LazyColumn {
-                items(predictions) { p ->
-                    ElevatedCard(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 4.dp)
-                            .clickable {
-                                viewModel.fetchPlace(p.placeId) {
-                                    navController.navigate("camera")
+                LazyColumn {
+                    items(predictions) { p ->
+                        ElevatedCard(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 4.dp)
+                                .clickable {
+                                    viewModel.fetchPlace(p.placeId) {
+                                        navController.navigate("camera")
+                                    }
                                 }
-                            }
-                    ) {
-                        ListItem(
-                            headlineContent = {
-                                Text(p.getFullText(null).toString())
-                            }
-                        )
+                        ) {
+                            ListItem(
+                                headlineContent = {
+                                    Text(p.getFullText(null).toString())
+                                }
+                            )
+                        }
                     }
                 }
             }
