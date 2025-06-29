@@ -86,6 +86,10 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
     implementation(libs.guava)
     implementation(libs.opencv.android)
+    implementation("androidx.core:core-splashscreen:1.0.0")
+    implementation("androidx.compose.material3:material3:1.2.1")
+
+
 
 
 }

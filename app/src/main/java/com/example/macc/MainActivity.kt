@@ -9,12 +9,15 @@ import com.example.macc.presentation.ui.LoginScreen
 import com.example.macc.presentation.ui.theme.MACC2025Theme
 import com.google.firebase.auth.FirebaseAuth
 import androidx.compose.runtime.*
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        installSplashScreen()
+
         super.onCreate(savedInstanceState)
 
         enableEdgeToEdge()
