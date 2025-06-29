@@ -2,6 +2,7 @@ package com.example.macc.presentation.ui
 
 import android.app.Activity
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import com.firebase.ui.auth.AuthUI
 import com.firebase.ui.auth.FirebaseAuthUIActivityResultContract
@@ -19,6 +20,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.macc.R
 import com.google.firebase.auth.FirebaseAuth
+import com.example.macc.presentation.ui.theme.Teal
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -79,20 +81,47 @@ fun LoginScreen() {
             OutlinedTextField(
                 value = email,
                 onValueChange = { email = it },
-                label = { Text("Email") }
+                label = { Text("Email") },
+                colors = TextFieldDefaults.outlinedTextFieldColors(
+                    focusedBorderColor = Teal,
+                    focusedLabelColor = Teal,
+                    cursorColor = Teal
+                )
+
             )
             Spacer(Modifier.height(8.dp))
             OutlinedTextField(
                 value = password,
                 onValueChange = { password = it },
                 label = { Text("Password") },
-                visualTransformation = PasswordVisualTransformation()
+                visualTransformation = PasswordVisualTransformation(),
+                colors = TextFieldDefaults.outlinedTextFieldColors(
+                    focusedBorderColor = Teal,
+                    focusedLabelColor = Teal,
+                    cursorColor = Teal
+                )
             )
             Spacer(Modifier.height(16.dp))
             Row {
-                Button(onClick = emailSignIn) { Text("Sign In") }
+                Button(
+                    onClick = emailSignIn,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF31514f),
+                        contentColor   = Color.White
+                    )
+                ) {
+                    Text("Sign In")
+                }
                 Spacer(Modifier.width(8.dp))
-                OutlinedButton(onClick = emailSignUp) { Text("Sign Up") }
+                OutlinedButton(
+                    onClick = emailSignUp,
+                    border = BorderStroke(1.dp, Color(0xFF31514f)),
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        contentColor = Color(0xFF31514f)
+                    )
+                ) {
+                    Text("Sign Up")
+                }
             }
 
             Spacer(Modifier.height(24.dp))
