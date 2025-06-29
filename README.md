@@ -25,7 +25,7 @@ The project was carried out with the intent of building a cloud-based mobile app
 Several tools were used in the development process, including JetPack Compose, Android Studio, Google Firebase Cloud, Google Places API and the Kotlin language.
 
 
-## 🕹️ How to use it
+## 🧭 How to use it
 
 Once signed in, the user may search for a place or location i.e. the Colosseum. Once selected from the list, a new screen is displayed with the camera view, asking the user to turn around and tap when confident enough to be looking at the selected place. Finally the user is credited with points depending on how close it got to the target. A button is presented to restart the process for other places.
 The app also includes a Leaderboard tab showcasing the top ranked players all over the world and a profile tab where the user can edit its personal info, log out or even delete its account.
