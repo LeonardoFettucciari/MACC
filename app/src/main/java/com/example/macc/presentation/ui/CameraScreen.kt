@@ -285,20 +285,33 @@ fun CameraScreen(
                     )
                 }
 
-                val (label, color) = difference?.let { diff ->
+                difference?.let { diff ->
                     val pts = points
-                    val c = if (diff < 15f) Color.Green else Color.Red
-                    "Off by ${diff.roundToInt()}° - $pts pts" to c
-                } ?: ("Heading: ${orientation.roundToInt()}°" to Color.White)
+                    val color = if (diff < 30f) Color(0xFF4CAF50) else Color(0xFFF44336)
 
-                Text(
-                    label,
-                    color = color,
-                    modifier = Modifier
-                        .align(Alignment.TopCenter)
-                        .background(Color.Black.copy(alpha = 0.5f))
-                        .padding(8.dp)
-                )
+                    Column(
+                        modifier = Modifier
+                            .align(Alignment.TopCenter)
+                            .padding(top = 32.dp)
+                            .background(Color.Black.copy(alpha = 0.6f), RoundedCornerShape(12.dp))
+                            .padding(horizontal = 24.dp, vertical = 12.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = "$pts points",
+                            color = Color.White,
+                            style = MaterialTheme.typography.headlineMedium
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = "Off by ${diff.absoluteValue.roundToInt()}°",
+                            color = color,
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                    }
+                }
+
+
             }
 
             // START OVER BUTTON WITH TOOLTIP

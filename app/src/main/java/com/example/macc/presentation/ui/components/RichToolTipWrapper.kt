@@ -1,20 +1,19 @@
 package com.example.macc.presentation.ui.components
 
-import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.DpSize
-import androidx.compose.ui.unit.dp
 import com.example.macc.data.local.TutorialPreferences
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RichTooltip(
     modifier: Modifier = Modifier,
-    prefKey: String? = null,
+    prefKey: String,
     richTooltipSubheadText: String = "Custom Rich Tooltip",
     richTooltipText: String = "Rich tooltips support multiple lines of informational text.",
     richTooltipActionText: String = "Got it",
@@ -24,22 +23,19 @@ fun RichTooltip(
     val coroutineScope = rememberCoroutineScope()
 
     val shownFlow = remember(prefKey) {
-        prefKey?.let { TutorialPreferences.tooltipShownFlow(context, it) }
+        TutorialPreferences.tooltipShownFlow(context, prefKey)
+            .map { prefsValue -> prefsValue }
+            .distinctUntilChanged()
     }
 
-    val shown by shownFlow?.collectAsState(initial = false) ?: remember { mutableStateOf(false) }
-    var resolved by remember { mutableStateOf(false) }
+    val shown: Boolean? by shownFlow.collectAsState(initial = null)
 
-    LaunchedEffect(shown) {
-        // Mark that the value has been resolved from DataStore
-        resolved = true
-    }
+    val isLoaded = shown != null
 
     val tooltipState = rememberTooltipState(isPersistent = true)
 
-    // Show tooltip only once, after the `shown` value is known
-    LaunchedEffect(resolved, shown) {
-        if (resolved && !shown && !tooltipState.isVisible) {
+    LaunchedEffect(isLoaded, shown) {
+        if (isLoaded && shown == false && !tooltipState.isVisible) {
             tooltipState.show()
         }
     }
@@ -51,17 +47,15 @@ fun RichTooltip(
             RichTooltip(
                 title = { Text(richTooltipSubheadText) },
                 action = {
-                    Row {
-                        TextButton(onClick = {
-                            coroutineScope.launch {
-                                tooltipState.dismiss()
-                                prefKey?.let { TutorialPreferences.setTooltipShown(context, it) }
-                            }
-                        }) {
-                            Text(richTooltipActionText)
+                    TextButton(onClick = {
+                        coroutineScope.launch {
+                            tooltipState.dismiss()
+                            TutorialPreferences.setTooltipShown(context, prefKey)
                         }
+                    }) {
+                        Text(richTooltipActionText)
                     }
-                },
+                }
             ) {
                 Text(richTooltipText)
             }
