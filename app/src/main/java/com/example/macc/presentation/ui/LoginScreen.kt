@@ -2,6 +2,7 @@ package com.example.macc.presentation.ui
 
 import android.app.Activity
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.compose.foundation.Image
 import com.firebase.ui.auth.AuthUI
 import com.firebase.ui.auth.FirebaseAuthUIActivityResultContract
 import androidx.compose.foundation.layout.*
@@ -67,6 +68,14 @@ fun LoginScreen() {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
+            Image(
+                painter = painterResource(R.drawable.text_logo_large),
+                contentDescription = "App logo",
+                modifier = Modifier
+                    .fillMaxWidth(0.8f)
+                    .padding(bottom = 24.dp)
+            )
+
             OutlinedTextField(
                 value = email,
                 onValueChange = { email = it },
